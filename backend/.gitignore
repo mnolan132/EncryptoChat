@@ -75,3 +75,7 @@ npm-debug.log
 
 # Windows
 Thumbs.db
+
+# Ignore service account keys
+backend/serviceAccountKey.json
+
