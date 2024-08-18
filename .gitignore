@@ -1,0 +1,77 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# TypeScript
+*.tsbuildinfo
+
+# Compiled output
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE-specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs_analysis.dat
+*.ncb
+*.swp
+
+# Coverage reports
+coverage/
+
+# Dependencies
+/pnpm-lock.yaml
+/pnpm-workspace.yaml
+
+# Build directories
+/.next
+/.out
+
+# Miscellaneous
+*.tgz
+*.zip
+
+# Specific tools
+# Webpack
+/.cache/
+/public/bundle.js
+
+# Firebase
+firebase-debug.log
+firebase.*.json
+
+# Miscellaneous build artifacts
+*.tmp
+*.bak
+
+# Yarn
+.yarn/
+
+# NPM
+package-lock.json
+npm-debug.log
+
+# macOS Finder
+.DS_Store
+
+# Windows
+Thumbs.db
