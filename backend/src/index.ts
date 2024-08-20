@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import { User } from "../User";
 const { collection, addDoc } = require("firebase/firestore");
 
+const bcrypt = require("bcrypt");
+const saltrounds = 10;
+
 dotenv.config();
 
 const app = express();
@@ -30,16 +33,26 @@ app.listen(port, () => {
 });
 
 app.post("/createUser", async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, plainPassword } = req.body;
 
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !email || !plainPassword) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const newUser = new User(firstName, lastName, email, password);
+  async function createUser(
+    firstName: string,
+    lastName: string,
+    email: string,
+    plainPassword: string
+  ) {
+    const saltRounds = 10;
+    const password = await bcrypt.hash(plainPassword, saltRounds);
+    const newUser: User = new User(firstName, lastName, email, password);
+    return newUser;
+  }
 
   try {
-    const docRef = await addDoc(collection(db, "users"), newUser);
+    const docRef = await addDoc(collection(db, "users"), createUser);
     res
       .status(201)
       .json({ message: "User created successfully", userId: docRef.id });

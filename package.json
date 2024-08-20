@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "firebase": "^10.13.0",
     "uuid": "^10.0.0"
   }
