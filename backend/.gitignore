@@ -77,5 +77,5 @@ npm-debug.log
 Thumbs.db
 
 # Ignore service account keys
-backend/serviceAccountKey.json
+serviceAccountKey.json
 
