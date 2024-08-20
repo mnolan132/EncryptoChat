@@ -1,5 +1,7 @@
-class User {
-  id: number;
+import { v4 as uuidv4 } from "uuid";
+
+export class User {
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -7,18 +9,16 @@ class User {
   contacts: number[];
 
   constructor(
-    id: number,
     firstName: string,
     lastName: string,
     email: string,
-    password: string,
-    contacts: number[]
+    password: string
   ) {
-    this.id = id;
+    this.id = uuidv4();
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
     this.password = password;
-    this.contacts = contacts;
+    this.contacts = [];
   }
 }
