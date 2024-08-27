@@ -2,23 +2,25 @@ import { v4 as uuidv4 } from "uuid";
 
 export class User {
   id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
   contacts: number[];
 
   constructor(
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string
+    public firstName: string,
+    public lastName: string,
+    public email: string,
+    public password: string
   ) {
     this.id = uuidv4();
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.email = email;
-    this.password = password;
     this.contacts = [];
+  }
+  toPlainObject() {
+    return {
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      password: this.password,
+      id: this.id,
+      contacts: this.contacts,
+    };
   }
 }
