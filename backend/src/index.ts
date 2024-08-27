@@ -22,22 +22,22 @@ const db = admin.firestore();
 
 app.use(express.json());
 
-// // Firestore write operation test wrapped in an async function
-// async function testFirestoreWrite() {
-//   try {
-//     const testDoc = await db.collection("users").add({
-//       firstName: "Test",
-//       lastName: "User",
-//       email: "test@example.com",
-//     });
-//     console.log("Document written with ID: ", testDoc.id);
-//   } catch (error) {
-//     console.error("Error adding document: ", error);
-//   }
-// }
+// Firestore write operation test wrapped in an async function
+async function testFirestoreWrite() {
+  try {
+    const testDoc = await db.collection("users").add({
+      firstName: "Test",
+      lastName: "User",
+      email: "test@example.com",
+    });
+    console.log("Document written with ID: ", testDoc.id);
+  } catch (error) {
+    console.error("Error adding document: ", error);
+  }
+}
 
 // // Call the function
-// testFirestoreWrite();
+testFirestoreWrite();
 
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
