@@ -9,27 +9,42 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5001;
 
-var serviceAccount = require("../serviceAccountKey.json");
+const serviceAccount = require("../serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
 });
 
-const db = admin.database();
+const db = admin.firestore();
+
+app.use(express.json());
 
 // Middleware
 app.use(express.json());
+
 
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
 });
 
 
-app.post("/createUser", async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+app.get("/testFirestore", async (req, res) => {
+  try {
+    const testDocRef = await db.collection("test").add({ test: "test" });
+    res
+      .status(200)
+      .json({ message: "Test document created", id: testDocRef.id });
+  } catch (error) {
+    console.error("Error creating test document: ", error);
+    res.status(500).json({ message: "Failed to create test document" });
+  }
+});
 
-  if (!firstName || !lastName || !email || !password) {
+app.post("/createUser", async (req, res) => {
+  const { firstName, lastName, email, plainPassword } = req.body;
+
+  if (!firstName || !lastName || !email || !plainPassword) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -40,6 +55,7 @@ app.post("/createUser", async (req, res) => {
     const userRef = db.ref(`users/${userId}`);
     await userRef.set(newUser);
     res.status(201).json({ message: "User created successfully", userId });
+
   } catch (error) {
     console.error("Error adding document", error);
     res.status(500).json({ message: "Failed to create user" });
