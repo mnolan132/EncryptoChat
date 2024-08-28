@@ -2,8 +2,7 @@
 import express from "express";
 import * as admin from "firebase-admin";
 import dotenv from "dotenv";
-import { User } from "../User";
-const { collection, addDoc } = require("firebase/firestore");
+
 
 dotenv.config();
 
@@ -20,15 +19,12 @@ admin.initializeApp({
 const db = admin.database();
 
 // Middleware
-// app.use(express.json());
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
 });
 
-app.listen(port, () => {
-  console.log(`Server is running http://localhost:${port}`);
-});
 
 app.post("/createUser", async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
@@ -37,15 +33,40 @@ app.post("/createUser", async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const newUser = new User(firstName, lastName, email, password);
+  const newUser = {firstName, lastName, email, password};
 
   try {
-    const docRef = await addDoc(collection(db, "users"), newUser);
-    res
-      .status(201)
-      .json({ message: "User created successfully", userId: docRef.id });
+    const userId = Date.now().toString();
+    const userRef = db.ref(`users/${userId}`);
+    await userRef.set(newUser);
+    res.status(201).json({ message: "User created successfully", userId });
   } catch (error) {
     console.error("Error adding document", error);
     res.status(500).json({ message: "Failed to create user" });
   }
+});
+
+
+app.get("/getUser/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const userRef = db.ref(`users/${userId}`);
+
+    userRef.once("value", (snapshot) => {
+      if (snapshot.exists()) {
+        res.status(200).json(snapshot.val());
+      } else {
+        res.status(404).json({ message: "User not found" });
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ message: "Failed to retrieve user data" });
+  }
+});
+
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });
