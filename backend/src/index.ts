@@ -2,9 +2,7 @@
 import express from "express";
 import * as admin from "firebase-admin";
 import dotenv from "dotenv";
-import { User } from "../User";
 
-const bcrypt = require("bcrypt");
 
 dotenv.config();
 
@@ -22,30 +20,14 @@ const db = admin.firestore();
 
 app.use(express.json());
 
-// Firestore write operation test wrapped in an async function
-async function testFirestoreWrite() {
-  try {
-    const testDoc = await db.collection("users").add({
-      firstName: "Test",
-      lastName: "User",
-      email: "test@example.com",
-    });
-    console.log("Document written with ID: ", testDoc.id);
-  } catch (error) {
-    console.error("Error adding document: ", error);
-  }
-}
+// Middleware
+app.use(express.json());
 
-// // Call the function
-testFirestoreWrite();
 
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
 });
 
-app.listen(port, () => {
-  console.log(`Server is running http://localhost:${port}`);
-});
 
 app.get("/testFirestore", async (req, res) => {
   try {
@@ -66,25 +48,41 @@ app.post("/createUser", async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
+  const newUser = {firstName, lastName, email, password};
+
   try {
-    // Hash the plain password
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    const userId = Date.now().toString();
+    const userRef = db.ref(`users/${userId}`);
+    await userRef.set(newUser);
+    res.status(201).json({ message: "User created successfully", userId });
 
-    // Create a new User instance
-    const newUser = new User(firstName, lastName, email, hashedPassword);
-
-    // Convert the User instance to a plain object
-    const newUserObject = newUser.toPlainObject();
-
-    // Add the plain object to Firestore
-    const docRef = await db.collection("users").add(newUserObject);
-
-    // Respond with success
-    res
-      .status(201)
-      .json({ message: "User created successfully", userId: docRef.id });
   } catch (error) {
     console.error("Error adding document", error);
     res.status(500).json({ message: "Failed to create user" });
   }
+});
+
+
+app.get("/getUser/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const userRef = db.ref(`users/${userId}`);
+
+    userRef.once("value", (snapshot) => {
+      if (snapshot.exists()) {
+        res.status(200).json(snapshot.val());
+      } else {
+        res.status(404).json({ message: "User not found" });
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ message: "Failed to retrieve user data" });
+  }
+});
+
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });
