@@ -1,4 +1,3 @@
-
 import express from "express";
 import * as admin from "firebase-admin";
 import dotenv from "dotenv";
@@ -21,6 +20,7 @@ admin.initializeApp({
 const db = admin.firestore();
 
 app.use(express.json());
+console.log("hello world");
 
 // // Firestore write operation test wrapped in an async function
 // async function testFirestoreWrite() {
