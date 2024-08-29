@@ -16,30 +16,26 @@ admin.initializeApp({
   databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
 });
 
-const db = admin.firestore();
+const db = admin.database(); // changed to real-time database
 
 app.use(express.json());
-
-// Middleware
-app.use(express.json());
-
 
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
 });
 
 
-app.get("/testFirestore", async (req, res) => {
+app.get("/testRealtimeDB", async (req, res) => {
   try {
-    const testDocRef = await db.collection("test").add({ test: "test" });
-    res
-      .status(200)
-      .json({ message: "Test document created", id: testDocRef.id });
+    const testDocRef = db.ref("test").push();  // Create a new document in the Realtime Database
+    await testDocRef.set({ test: "test" });
+    res.status(200).json({ message: "Test document created", id: testDocRef.key });
   } catch (error) {
     console.error("Error creating test document: ", error);
     res.status(500).json({ message: "Failed to create test document" });
   }
 });
+
 
 app.post("/createUser", async (req, res) => {
   const { firstName, lastName, email, plainPassword } = req.body;
@@ -48,14 +44,13 @@ app.post("/createUser", async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const newUser = {firstName, lastName, email, password};
+  const newUser = {firstName, lastName, email, plainPassword,};
 
   try {
     const userId = Date.now().toString();
     const userRef = db.ref(`users/${userId}`);
     await userRef.set(newUser);
     res.status(201).json({ message: "User created successfully", userId });
-
   } catch (error) {
     console.error("Error adding document", error);
     res.status(500).json({ message: "Failed to create user" });
