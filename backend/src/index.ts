@@ -130,6 +130,82 @@ app.get("/getUser/:userId", async (req, res) => {
   }
 });
 
+// Contacts 
+// Add contact
+app.post("/addContact/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const { name, phone, email } = req.body;
+
+  if (!name || !phone || !email) {
+    return res.status(400).json({ message: "All contact fields are required" });
+  }
+
+  try {
+    const contactId = uuidv4();
+    const contactRef = db.ref(`users/${userId}/contacts/${contactId}`);
+    await contactRef.set({ contactId, name, phone, email });
+    res.status(201).json({ message: "Contact added successfully", contactId });
+  } catch (error) {
+    console.error("Error adding contact:", error);
+    res.status(500).json({ message: "Failed to add contact" });
+  }
+});
+
+// Retrieved Contact
+app.get("/getContact/:userId/:contactId", async (req, res) => {
+  const { userId, contactId } = req.params;
+
+  try {
+    const userRef = db.ref(`users/${userId}/contacts/${contactId}`);
+
+    userRef.once("value", (snapshot) => {
+      if (snapshot.exists()) {
+        res.status(200).json(snapshot.val());
+      } else {
+        res.status(404).json({ message: "Contact not found" });
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ message: "Failed to retrieve contact data" });
+  }
+});
+
+
+// Edit contact
+app.put("/editContact/:userId/:contactId", async (req, res) => {
+  const { userId, contactId } = req.params;
+  const { name, phone, email } = req.body;
+
+  if (!name || !phone || !email) {
+    return res.status(400).json({ message: "All contact fields are required" });
+  }
+
+  try {
+    const contactRef = db.ref(`users/${userId}/contacts/${contactId}`);
+    await contactRef.update({ name, phone, email });
+    res.status(200).json({ message: "Contact updated successfully" });
+  } catch (error) {
+    console.error("Error updating contact:", error);
+    res.status(500).json({ message: "Failed to update contact" });
+  }
+});
+
+// Delete contact
+app.delete("/deleteContact/:userId/:contactId", async (req, res) => {
+  const { userId, contactId } = req.params;
+
+  try {
+    const contactRef = db.ref(`users/${userId}/contacts/${contactId}`);
+    await contactRef.remove();
+    res.status(200).json({ message: "Contact deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting contact:", error);
+    res.status(500).json({ message: "Failed to delete contact" });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
