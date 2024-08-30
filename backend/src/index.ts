@@ -1,7 +1,10 @@
 import express from "express";
 import * as admin from "firebase-admin";
 import dotenv from "dotenv";
+import { User } from "../User";
+import { v4 as uuidv4 } from "uuid";
 
+const bcrypt = require("bcrypt");
 
 dotenv.config();
 
@@ -24,18 +27,18 @@ app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
 });
 
-
 app.get("/testRealtimeDB", async (req, res) => {
   try {
-    const testDocRef = db.ref("test").push();  // Create a new document in the Realtime Database
+    const testDocRef = db.ref("test").push(); // Create a new document in the Realtime Database
     await testDocRef.set({ test: "test" });
-    res.status(200).json({ message: "Test document created", id: testDocRef.key });
+    res
+      .status(200)
+      .json({ message: "Test document created", id: testDocRef.key });
   } catch (error) {
     console.error("Error creating test document: ", error);
     res.status(500).json({ message: "Failed to create test document" });
   }
 });
-
 
 app.post("/createUser", async (req, res) => {
   const { firstName, lastName, email, plainPassword } = req.body;
@@ -44,10 +47,13 @@ app.post("/createUser", async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const newUser = {firstName, lastName, email, plainPassword,};
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
+
+  const userId = uuidv4();
+  const newUser = new User(firstName, lastName, email, hashedPassword, userId);
 
   try {
-    const userId = Date.now().toString();
     const userRef = db.ref(`users/${userId}`);
     await userRef.set(newUser);
     res.status(201).json({ message: "User created successfully", userId });
@@ -56,7 +62,6 @@ app.post("/createUser", async (req, res) => {
     res.status(500).json({ message: "Failed to create user" });
   }
 });
-
 
 app.get("/getUser/:userId", async (req, res) => {
   const { userId } = req.params;
@@ -76,7 +81,6 @@ app.get("/getUser/:userId", async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve user data" });
   }
 });
-
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
