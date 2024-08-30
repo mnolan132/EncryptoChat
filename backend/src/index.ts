@@ -63,6 +63,54 @@ app.post("/createUser", async (req, res) => {
   }
 });
 
+app.post("/login", async (req, res) => {
+  const { email, plainPassword } = req.body;
+
+  if (!email || !plainPassword) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  try {
+    // Define the User type
+    interface User {
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      id: string;
+    }
+
+    // Find the user by email
+    const usersRef = db.ref("users");
+    const snapshot = await usersRef.once("value");
+    let user: User | undefined;
+
+    snapshot.forEach((childSnapshot) => {
+      const userData = childSnapshot.val() as User;
+      if (userData.email === email) {
+        user = userData;
+      }
+    });
+
+    // Ensure user is defined before proceeding
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Compare the provided password with the stored hashed password
+    const isMatch = await bcrypt.compare(plainPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+
+    // If successful, respond with a success message or token
+    res.status(200).json({ message: "Login successful", userId: user.id });
+  } catch (error) {
+    console.error("Error logging in", error);
+    res.status(500).json({ message: "Failed to log in" });
+  }
+});
+
 app.get("/getUser/:userId", async (req, res) => {
   const { userId } = req.params;
 
