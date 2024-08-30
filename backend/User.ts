@@ -1,16 +1,13 @@
-import { v4 as uuidv4 } from "uuid";
-
 export class User {
-  id: string;
   contacts: number[];
 
   constructor(
     public firstName: string,
     public lastName: string,
     public email: string,
-    public password: string
+    public password: string,
+    public id: string
   ) {
-    this.id = uuidv4();
     this.contacts = [];
   }
   toPlainObject() {
