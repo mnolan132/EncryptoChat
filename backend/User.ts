@@ -1,5 +1,6 @@
 export class User {
-  contacts: number[];
+  contacts: string[];
+  secret: number;
 
   constructor(
     public firstName: string,
@@ -9,15 +10,6 @@ export class User {
     public id: string
   ) {
     this.contacts = [];
-  }
-  toPlainObject() {
-    return {
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      password: this.password,
-      id: this.id,
-      contacts: this.contacts,
-    };
+    this.secret = 0;
   }
 }

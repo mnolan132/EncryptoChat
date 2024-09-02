@@ -3,8 +3,23 @@ import * as admin from "firebase-admin";
 import dotenv from "dotenv";
 import { User } from "../User";
 import { v4 as uuidv4 } from "uuid";
+import { fetchUser } from "../utils";
 
 const bcrypt = require("bcrypt");
+const OTPAuth = require("otpauth");
+const QRCode = require("qrcode");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "chatencrypto@gmail.com",
+    pass: "jtgjdwirnnulqsbz",
+  },
+});
 
 dotenv.config();
 
@@ -18,10 +33,10 @@ admin.initializeApp({
   databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
 });
 
-const db = admin.database(); // changed to real-time database
+export const db = admin.database(); // changed to real-time database
 
 app.use(express.json());
-console.log("hello world");
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
@@ -111,6 +126,47 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Endpoint to enable two-way authentication
+app.post("/enable-2fa", async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    // Fetch the user asynchronously
+    const user = await fetchUser(userId);
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Generate a secret key for the user
+    user.secret = Math.floor(Math.random() * 899999 + 100000);
+    console.log(user.secret);
+
+    //Need to build in a way to save this secret key to the database
+
+    const mailOptions = {
+      from: "chatencrypto@gmail.com",
+      to: user.email,
+      subject: `Your two-factor authenication pass-key is ${user.secret} `,
+      text: "This email is sent from Encrypto Chat",
+    };
+
+    transporter.sendMail(mailOptions, (error: any, info: { response: any }) => {
+      if (error) {
+        console.error("Error sending email: ", error);
+      } else {
+        console.log("Email sent: ", info.response);
+        res.status(200).send("2FA code sent");
+      }
+    });
+  } catch (error) {
+    console.error("Error enabling 2FA:", error);
+    res.status(500).send("Failed to enable 2FA");
+  }
+});
+
+app.post("/verify-2fa", async (req, res) => {});
+
 app.get("/getUser/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -130,7 +186,7 @@ app.get("/getUser/:userId", async (req, res) => {
   }
 });
 
-// Contacts 
+// Contacts
 // Add contact
 app.post("/addContact/:userId", async (req, res) => {
   const { userId } = req.params;
@@ -171,7 +227,6 @@ app.get("/getContact/:userId/:contactId", async (req, res) => {
   }
 });
 
-
 // Edit contact
 app.put("/editContact/:userId/:contactId", async (req, res) => {
   const { userId, contactId } = req.params;
@@ -204,7 +259,6 @@ app.delete("/deleteContact/:userId/:contactId", async (req, res) => {
     res.status(500).json({ message: "Failed to delete contact" });
   }
 });
-
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
