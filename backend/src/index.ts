@@ -3,11 +3,10 @@ import * as admin from "firebase-admin";
 import dotenv from "dotenv";
 import { User } from "../User";
 import { v4 as uuidv4 } from "uuid";
-import { fetchUser } from "../utils";
+import { fetchUser, passwordMatch } from "../utils";
+import { stringify } from "querystring";
 
 const bcrypt = require("bcrypt");
-const OTPAuth = require("otpauth");
-const QRCode = require("qrcode");
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
@@ -142,6 +141,9 @@ app.post("/enable-2fa", async (req, res) => {
     user.secret = Math.floor(Math.random() * 899999 + 100000);
     console.log(user.secret);
 
+    // Update the secret on the db so that it can be verified in the verify-2fa function
+    await db.ref(`users/${userId}`).update({ secret: user.secret });
+
     //Need to build in a way to save this secret key to the database
 
     const mailOptions = {
@@ -165,7 +167,34 @@ app.post("/enable-2fa", async (req, res) => {
   }
 });
 
-app.post("/verify-2fa", async (req, res) => {});
+app.post("/verify-2fa", async (req, res) => {
+  const { userId, secretAttempt } = req.body;
+
+  if (!secretAttempt) {
+    return res.status(400).json({ message: "Please provide your secure code" });
+  }
+
+  try {
+    const user = await fetchUser(userId);
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const isMatch = passwordMatch(secretAttempt, user.secret);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect key" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Verification successful", userId: user.id });
+  } catch (error) {
+    console.error("Error verifying 2FA:", error);
+    res.status(500).send("Failed to verify 2FA");
+  }
+});
 
 app.get("/getUser/:userId", async (req, res) => {
   const { userId } = req.params;
