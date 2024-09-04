@@ -5,6 +5,7 @@ import { User } from "../User";
 import { v4 as uuidv4 } from "uuid";
 import { fetchUser, passwordMatch } from "../utils";
 import { stringify } from "querystring";
+import { snapshot } from "node:test";
 
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
@@ -219,16 +220,35 @@ app.get("/getUser/:userId", async (req, res) => {
 // Add contact
 app.post("/addContact/:userId", async (req, res) => {
   const { userId } = req.params;
-  const { name, phone, email } = req.body;
+  const { name, email } = req.body;
 
-  if (!name || !phone || !email) {
+  if (!name || !email) {
     return res.status(400).json({ message: "All contact fields are required" });
   }
 
   try {
+    // Check if the contact's email exists in the users database || NOTE: need to change email to unique username
+    const usersRef = db.ref("users");
+    const snapshot = await usersRef.once("value");
+    let contactExists = false;
+    let contactUserId = null;
+
+    snapshot.forEach((childSnapshot) => {
+      const userData = childSnapshot.val();
+      if (userData.email === email) {
+        contactExists = true;
+        contactUserId = childSnapshot.key; // get the userId of the contact
+      }
+    });
+
+    if (!contactExists) {
+      return res.status(404).json({ message: "Contact user not found" });
+    }
+
+    // If the contact exists, add them to the current user's contact list
     const contactId = uuidv4();
     const contactRef = db.ref(`users/${userId}/contacts/${contactId}`);
-    await contactRef.set({ contactId, name, phone, email });
+    await contactRef.set({ contactId, name, email, contactUserId });
     res.status(201).json({ message: "Contact added successfully", contactId });
   } catch (error) {
     console.error("Error adding contact:", error);
@@ -236,56 +256,24 @@ app.post("/addContact/:userId", async (req, res) => {
   }
 });
 
-// Retrieved Contact
-app.get("/getContact/:userId/:contactId", async (req, res) => {
-  const { userId, contactId } = req.params;
+// Shows all the contacts added by the specific user
+app.get("/getContacts/:userId", async (req, res) => {
+  const { userId } = req.params;
 
   try {
-    const userRef = db.ref(`users/${userId}/contacts/${contactId}`);
+    const contactsRef = db.ref(`users/${userId}/contacts`);
 
-    userRef.once("value", (snapshot) => {
+    contactsRef.once("value", (snapshot) => {
       if (snapshot.exists()) {
-        res.status(200).json(snapshot.val());
+        const contacts = snapshot.val();
+        res.status(200).json(contacts);
       } else {
-        res.status(404).json({ message: "Contact not found" });
+        res.status(404).json({message: "No contacts found for this user"});
       }
     });
   } catch (error) {
-    console.error("Error fetching user data:", error);
-    res.status(500).json({ message: "Failed to retrieve contact data" });
-  }
-});
-
-// Edit contact
-app.put("/editContact/:userId/:contactId", async (req, res) => {
-  const { userId, contactId } = req.params;
-  const { name, phone, email } = req.body;
-
-  if (!name || !phone || !email) {
-    return res.status(400).json({ message: "All contact fields are required" });
-  }
-
-  try {
-    const contactRef = db.ref(`users/${userId}/contacts/${contactId}`);
-    await contactRef.update({ name, phone, email });
-    res.status(200).json({ message: "Contact updated successfully" });
-  } catch (error) {
-    console.error("Error updating contact:", error);
-    res.status(500).json({ message: "Failed to update contact" });
-  }
-});
-
-// Delete contact
-app.delete("/deleteContact/:userId/:contactId", async (req, res) => {
-  const { userId, contactId } = req.params;
-
-  try {
-    const contactRef = db.ref(`users/${userId}/contacts/${contactId}`);
-    await contactRef.remove();
-    res.status(200).json({ message: "Contact deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting contact:", error);
-    res.status(500).json({ message: "Failed to delete contact" });
+    console.error("Error fetching contacts", error);
+    res.status(500).json({message: "Failed to retrieve contacts"});
   }
 });
 
