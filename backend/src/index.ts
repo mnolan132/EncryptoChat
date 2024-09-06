@@ -216,7 +216,6 @@ app.get("/getUser/:userId", async (req, res) => {
   }
 });
 
-// Contacts
 // Add contact
 app.post("/addContact/:userId", async (req, res) => {
   const { userId } = req.params;
@@ -227,55 +226,96 @@ app.post("/addContact/:userId", async (req, res) => {
   }
 
   try {
-    // Check if the contact's email exists in the users database || NOTE: need to change email to unique username
+    // Define the User type
+    interface User {
+      contacts: string[];
+      firstName: string;
+      lastName: string;
+      email: string;
+      id: string;
+    }
+
+    // Check if the contact's email exists in the users database
     const usersRef = db.ref("users");
     const snapshot = await usersRef.once("value");
     let contactExists = false;
-    let contactUserId = null;
+    let contactUserId: string | null = null;
 
     snapshot.forEach((childSnapshot) => {
-      const userData = childSnapshot.val();
+      const userData = childSnapshot.val() as User;
       if (userData.email === email) {
         contactExists = true;
         contactUserId = childSnapshot.key; // get the userId of the contact
       }
     });
 
-    if (!contactExists) {
+    if (!contactExists || !contactUserId) {
       return res.status(404).json({ message: "Contact user not found" });
     }
 
-    // If the contact exists, add them to the current user's contact list
-    const contactId = uuidv4();
-    const contactRef = db.ref(`users/${userId}/contacts/${contactId}`);
-    await contactRef.set({ contactId, name, email, contactUserId });
-    res.status(201).json({ message: "Contact added successfully", contactId });
+    // Get the current user's contacts
+    const userRef = db.ref(`users/${userId}`);
+    const userSnapshot = await userRef.once("value");
+    const userData = userSnapshot.val() as User;
+
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the contact is already in the user's contact list
+    const contacts = userData.contacts || [];
+    if (contacts.includes(contactUserId)) {
+      return res.status(400).json({ message: "Contact is already in your contacts list" });
+    }
+
+    // Add new contact to contacts array and update the user's data
+    contacts.push(contactUserId);
+    await userRef.update({ contacts });
+
+    res.status(201).json({ message: "Contact added successfully", name, contactUserId });
   } catch (error) {
     console.error("Error adding contact:", error);
     res.status(500).json({ message: "Failed to add contact" });
   }
 });
 
-// Shows all the contacts added by the specific user
+
+// Shows user's contact list
 app.get("/getContacts/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const contactsRef = db.ref(`users/${userId}/contacts`);
+    const userRef = db.ref(`users/${userId}`);
+    const userSnapshot = await userRef.once("value");
+    const userData = userSnapshot.val() as User;
 
-    contactsRef.once("value", (snapshot) => {
-      if (snapshot.exists()) {
-        const contacts = snapshot.val();
-        res.status(200).json(contacts);
-      } else {
-        res.status(404).json({message: "No contacts found for this user"});
-      }
-    });
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const contacts = userData.contacts || [];
+
+    // Show contact details
+    const contactDetails = await Promise.all(
+      contacts.map(async (contactId) => {
+        const contactRef = db.ref(`users/${contactId}`);
+        const contactSnapshot = await contactRef.once("value");
+        const contactData = contactSnapshot.val();
+        return {
+          id: contactId,
+          name: `${contactData.firstName} ${contactData.lastName}`,
+          email: contactData.email,
+        };
+      })
+    );
+
+    res.status(200).json({ contacts: contactDetails });
   } catch (error) {
-    console.error("Error fetching contacts", error);
-    res.status(500).json({message: "Failed to retrieve contacts"});
+    console.error("Error fetching contacts:", error);
+    res.status(500).json({ message: "Failed to fetch contacts" });
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
