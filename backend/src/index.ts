@@ -4,22 +4,10 @@ import dotenv from "dotenv";
 import { User } from "../User";
 import { v4 as uuidv4 } from "uuid";
 import { fetchUser, passwordMatch } from "../utils";
+import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/authRoutes";
 import { stringify } from "querystring";
 import { snapshot } from "node:test";
-
-const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: "chatencrypto@gmail.com",
-    pass: "jtgjdwirnnulqsbz",
-  },
-});
 
 dotenv.config();
 
@@ -38,6 +26,10 @@ export const db = admin.database(); // changed to real-time database
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Routes
+app.use("/users", userRoutes);
+app.use("/auth", authRoutes);
+
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
 });
@@ -52,167 +44,6 @@ app.get("/testRealtimeDB", async (req, res) => {
   } catch (error) {
     console.error("Error creating test document: ", error);
     res.status(500).json({ message: "Failed to create test document" });
-  }
-});
-
-app.post("/createUser", async (req, res) => {
-  const { firstName, lastName, email, plainPassword } = req.body;
-
-  if (!firstName || !lastName || !email || !plainPassword) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
-
-  const userId = uuidv4();
-  const newUser = new User(firstName, lastName, email, hashedPassword, userId);
-
-  try {
-    const userRef = db.ref(`users/${userId}`);
-    await userRef.set(newUser);
-    res.status(201).json({ message: "User created successfully", userId });
-  } catch (error) {
-    console.error("Error adding document", error);
-    res.status(500).json({ message: "Failed to create user" });
-  }
-});
-
-app.post("/login", async (req, res) => {
-  const { email, plainPassword } = req.body;
-
-  if (!email || !plainPassword) {
-    return res.status(400).json({ message: "Email and password are required" });
-  }
-
-  try {
-    // Define the User type
-    interface User {
-      firstName: string;
-      lastName: string;
-      email: string;
-      password: string;
-      id: string;
-    }
-
-    // Find the user by email
-    const usersRef = db.ref("users");
-    const snapshot = await usersRef.once("value");
-    let user: User | undefined;
-
-    snapshot.forEach((childSnapshot) => {
-      const userData = childSnapshot.val() as User;
-      if (userData.email === email) {
-        user = userData;
-      }
-    });
-
-    // Ensure user is defined before proceeding
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Compare the provided password with the stored hashed password
-    const isMatch = await bcrypt.compare(plainPassword, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Incorrect password" });
-    }
-
-    // If successful, respond with a success message or token
-    res.status(200).json({ message: "Login successful", userId: user.id });
-  } catch (error) {
-    console.error("Error logging in", error);
-    res.status(500).json({ message: "Failed to log in" });
-  }
-});
-
-// Endpoint to enable two-way authentication
-app.post("/enable-2fa", async (req, res) => {
-  const { userId } = req.body;
-
-  try {
-    // Fetch the user asynchronously
-    const user = await fetchUser(userId);
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    // Generate a secret key for the user
-    user.secret = Math.floor(Math.random() * 899999 + 100000);
-    console.log(user.secret);
-
-    // Update the secret on the db so that it can be verified in the verify-2fa function
-    await db.ref(`users/${userId}`).update({ secret: user.secret });
-
-    //Need to build in a way to save this secret key to the database
-
-    const mailOptions = {
-      from: "chatencrypto@gmail.com",
-      to: user.email,
-      subject: `Your two-factor authenication pass-key is ${user.secret} `,
-      text: "This email is sent from Encrypto Chat",
-    };
-
-    transporter.sendMail(mailOptions, (error: any, info: { response: any }) => {
-      if (error) {
-        console.error("Error sending email: ", error);
-      } else {
-        console.log("Email sent: ", info.response);
-        res.status(200).send("2FA code sent");
-      }
-    });
-  } catch (error) {
-    console.error("Error enabling 2FA:", error);
-    res.status(500).send("Failed to enable 2FA");
-  }
-});
-
-app.post("/verify-2fa", async (req, res) => {
-  const { userId, secretAttempt } = req.body;
-
-  if (!secretAttempt) {
-    return res.status(400).json({ message: "Please provide your secure code" });
-  }
-
-  try {
-    const user = await fetchUser(userId);
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    const isMatch = passwordMatch(secretAttempt, user.secret);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: "Incorrect key" });
-    }
-
-    res
-      .status(200)
-      .json({ message: "Verification successful", userId: user.id });
-  } catch (error) {
-    console.error("Error verifying 2FA:", error);
-    res.status(500).send("Failed to verify 2FA");
-  }
-});
-
-app.get("/getUser/:userId", async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const userRef = db.ref(`users/${userId}`);
-
-    userRef.once("value", (snapshot) => {
-      if (snapshot.exists()) {
-        res.status(200).json(snapshot.val());
-      } else {
-        res.status(404).json({ message: "User not found" });
-      }
-    });
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    res.status(500).json({ message: "Failed to retrieve user data" });
   }
 });
 
@@ -268,12 +99,12 @@ app.get("/getContacts/:userId", async (req, res) => {
         const contacts = snapshot.val();
         res.status(200).json(contacts);
       } else {
-        res.status(404).json({message: "No contacts found for this user"});
+        res.status(404).json({ message: "No contacts found for this user" });
       }
     });
   } catch (error) {
     console.error("Error fetching contacts", error);
-    res.status(500).json({message: "Failed to retrieve contacts"});
+    res.status(500).json({ message: "Failed to retrieve contacts" });
   }
 });
 
