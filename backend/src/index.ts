@@ -226,7 +226,7 @@ app.post("/addContact/:userId", async (req, res) => {
   }
 
   try {
-    // Define the User type
+    // Define User type
     interface User {
       contacts: string[];
       firstName: string;
@@ -268,7 +268,7 @@ app.post("/addContact/:userId", async (req, res) => {
       return res.status(400).json({ message: "Contact is already in your contacts list" });
     }
 
-    // Add new contact to contacts array and update the user's data
+    // Add update contact to user's data
     contacts.push(contactUserId);
     await userRef.update({ contacts });
 
@@ -313,6 +313,35 @@ app.get("/getContacts/:userId", async (req, res) => {
   } catch (error) {
     console.error("Error fetching contacts:", error);
     res.status(500).json({ message: "Failed to fetch contacts" });
+  }
+});
+
+// Delete contact
+app.delete("/deleteContact/:userId/:contactId", async (req, res) => {
+  const { userId, contactId } = req.params;
+
+  try {
+    const userRef = db.ref(`users/${userId}`);
+    const userSnapshot = await userRef.once("value");
+    const userData = userSnapshot.val() as User;
+
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let contacts = userData.contacts || [];
+    if (!contacts.includes(contactId)) {
+      return res.status(404).json({ message: "Contact not found in user's contact list" });
+    }
+
+    contacts = contacts.filter((id) => id !== contactId);
+
+    await userRef.update({ contacts });
+
+    res.status(200).json({ message: "Contact deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting contact:", error);
+    res.status(500).json({ message: "Failed to delete contact" });
   }
 });
 
