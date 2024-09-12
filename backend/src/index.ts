@@ -4,22 +4,10 @@ import dotenv from "dotenv";
 import { User } from "../User";
 import { v4 as uuidv4 } from "uuid";
 import { fetchUser, passwordMatch } from "../utils";
+import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/authRoutes";
 import { stringify } from "querystring";
 import { snapshot } from "node:test";
-
-const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: "chatencrypto@gmail.com",
-    pass: "jtgjdwirnnulqsbz",
-  },
-});
 
 dotenv.config();
 
@@ -38,6 +26,10 @@ export const db = admin.database(); // changed to real-time database
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Routes
+app.use("/users", userRoutes);
+app.use("/auth", authRoutes);
+
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
 });
@@ -54,6 +46,7 @@ app.get("/testRealtimeDB", async (req, res) => {
     res.status(500).json({ message: "Failed to create test document" });
   }
 });
+
 
 app.post("/createUser", async (req, res) => {
   const { firstName, lastName, email, plainPassword } = req.body;
@@ -216,6 +209,7 @@ app.get("/getUser/:userId", async (req, res) => {
   }
 });
 
+// Contacts
 // Add contact
 app.post("/addContact/:userId", async (req, res) => {
   const { userId } = req.params;
@@ -289,6 +283,7 @@ app.get("/getContacts/:userId", async (req, res) => {
     const userSnapshot = await userRef.once("value");
     const userData = userSnapshot.val() as User;
 
+
     if (!userData) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -342,6 +337,18 @@ app.delete("/deleteContact/:userId/:contactId", async (req, res) => {
   } catch (error) {
     console.error("Error deleting contact:", error);
     res.status(500).json({ message: "Failed to delete contact" });
+
+    contactsRef.once("value", (snapshot) => {
+      if (snapshot.exists()) {
+        const contacts = snapshot.val();
+        res.status(200).json(contacts);
+      } else {
+        res.status(404).json({ message: "No contacts found for this user" });
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching contacts", error);
+    res.status(500).json({ message: "Failed to retrieve contacts" });
   }
 });
 

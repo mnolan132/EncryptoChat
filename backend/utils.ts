@@ -1,5 +1,10 @@
 import { db } from "./src/index";
 import { User } from "./User";
+import dotenv from "dotenv";
+
+const nodemailer = require("nodemailer");
+
+dotenv.config();
 
 export const fetchUser = (userId: string): Promise<User | null> => {
   return new Promise((resolve, reject) => {
@@ -29,3 +34,14 @@ export const passwordMatch = (passwordAttempt: string, secret: number) => {
     return false;
   }
 };
+
+export const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "chatencrypto@gmail.com",
+    pass: process.env.GMAIL_PASS,
+  },
+});
