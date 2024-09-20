@@ -1,20 +1,16 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import Home from "./components/Home";
-import Chat from "./components/Chat";
-import Profile from "./components/Profile";
-import NotFound from "./components/NotFound";
+import * as React from "react";
+import { ChakraProvider } from "@chakra-ui/react";
 
+import Login from "./login/Login";
+
+import "./App.css";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/chat" element={<Chat />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  )
-};
+    <ChakraProvider>
+      <Login />
+    </ChakraProvider>
+  );
+}
 
 export default App;
