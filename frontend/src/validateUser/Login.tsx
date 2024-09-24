@@ -1,5 +1,4 @@
 import { useState } from "react";
-import logo from "../assets/logo.png";
 import {
   Input,
   Stack,
@@ -8,21 +7,28 @@ import {
   InputRightElement,
   Button,
   Box,
-  Image,
   Text,
-  Link,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
-const Login = () => {
+interface LoginProps {
+  handleSelectSignup: () => void;
+  showPassword: () => void;
+  show: boolean;
+  selectSignup: boolean;
+}
+
+const Login: React.FC<LoginProps> = ({
+  handleSelectSignup,
+  showPassword,
+  show,
+  selectSignup,
+}): JSX.Element => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [show, setShow] = useState(false);
 
-  const showPassword = () => setShow(!show);
   return (
-    <Box display="flex" flexDir={"column"} alignItems={"center"}>
-      <Image src={logo} boxSize={"300px"} />
+    <Box display={selectSignup ? "none" : "block"}>
       <form>
         <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
           <FormControl isRequired>
@@ -65,7 +71,10 @@ const Login = () => {
         </Button>
       </form>
       <Text>
-        Don't have an account? Sign up<Link> here</Link>
+        Don't have an account?
+        <Box onClick={handleSelectSignup}>
+          <Text as={"b"}>Sign up here</Text>
+        </Box>
       </Text>
     </Box>
   );
