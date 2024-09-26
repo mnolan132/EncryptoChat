@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import contactRoutes from "./routes/contactRoutes";
+import cors from "cors";
 
 dotenv.config();
 
@@ -22,8 +23,10 @@ export const db = admin.database(); // changed to real-time database
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(cors({ origin: "http://localhost:5173" }));
+
 // Routes
-app.use("/users", userRoutes);
+app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/contacts", contactRoutes);
 

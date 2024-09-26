@@ -7,6 +7,7 @@ import {
   InputRightElement,
   Button,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useState } from "react";
@@ -30,9 +31,44 @@ const Signup: React.FC<SignupProps> = ({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const toast = useToast();
+
+  const createUser = async (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    try {
+      const response = await fetch("http://localhost:5001/user/createUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          plainPassword: password,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(data);
+      toast({
+        title: "Account created!",
+        description: "Head back to the log in screen and sign in",
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <Box display={!selectSignup ? "none" : "block"}>
-      <form>
+      <form onSubmit={createUser}>
         <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
           <FormControl isRequired>
             <Input
@@ -119,7 +155,7 @@ const Signup: React.FC<SignupProps> = ({
             </InputGroup>
           </Stack>
         </Box>
-        <Button bg={"#0CCEC2"} size={"lg"} m={"25px"}>
+        <Button type={"submit"} bg={"#0CCEC2"} size={"lg"} m={"25px"}>
           Sign Up
         </Button>
       </form>
