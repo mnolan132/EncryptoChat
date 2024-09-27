@@ -8,7 +8,6 @@ import {
   Button,
   Box,
   Text,
-  useToast,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import TwoFA from "./TwoFA";
@@ -29,15 +28,35 @@ const Login: React.FC<LoginProps> = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [viewTwoFA, setViewTwoFA] = useState(false);
+  const [userIdString, setUserIdString] = useState(null);
 
   const handle2FAComponent = () => {
     setViewTwoFA(!viewTwoFA);
   };
 
-  const toast = useToast();
+  const send2FA = async (e: { preventDefault: () => void }, userId: string) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`http://localhost:5001/auth/enable-2fa`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      });
 
-  const logIn = async (event: { preventDefault: () => void }) => {
-    event.preventDefault();
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const logIn = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
     try {
       const response = await fetch("http://localhost:5001/auth/login", {
         method: "POST",
@@ -51,7 +70,9 @@ const Login: React.FC<LoginProps> = ({
       }
 
       const data = await response.json();
-      console.log(data);
+      const userId = data.userId;
+      setUserIdString(userId);
+      send2FA(e, userId);
 
       handle2FAComponent();
     } catch (error) {
@@ -114,7 +135,7 @@ const Login: React.FC<LoginProps> = ({
           </Text>
         </Box>
       </Box>
-      <TwoFA viewTwoFA={viewTwoFA} />
+      <TwoFA userIdString={userIdString} viewTwoFA={viewTwoFA} />
     </>
   );
 };
