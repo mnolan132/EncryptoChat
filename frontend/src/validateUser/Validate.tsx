@@ -18,12 +18,15 @@ const Validate = () => {
       display={"flex"}
       flexDir={{ base: "column", lg: "row" }}
       alignItems={"center"}
+      justifyContent={{ base: "middle", lg: "center" }}
       height={"100vh"}
+      w={"100vw"}
+      m={"0 auto"}
     >
       <Image
         src={logo}
         boxSize={{ base: "300px", md: "400px", lg: "550px" }}
-        my={selectSignup ? "-70px" : "0px"}
+        my={selectSignup ? "-30px" : "0px"}
       />
       <Login
         handleSelectSignup={handleSelectSignup}
