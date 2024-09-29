@@ -17,6 +17,7 @@ interface LoginProps {
   showPassword: () => void;
   show: boolean;
   selectSignup: boolean;
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Login: React.FC<LoginProps> = ({
@@ -24,6 +25,7 @@ const Login: React.FC<LoginProps> = ({
   showPassword,
   show,
   selectSignup,
+  setIsLoggedIn,
 }): JSX.Element => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -135,7 +137,11 @@ const Login: React.FC<LoginProps> = ({
           </Text>
         </Box>
       </Box>
-      <TwoFA userIdString={userIdString} viewTwoFA={viewTwoFA} />
+      <TwoFA
+        userIdString={userIdString}
+        viewTwoFA={viewTwoFA}
+        setIsLoggedIn={setIsLoggedIn}
+      />
     </>
   );
 };

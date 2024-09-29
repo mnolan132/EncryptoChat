@@ -4,9 +4,14 @@ import { useState } from "react";
 interface TwoFAProps {
   viewTwoFA: boolean;
   userIdString: null | string;
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const TwoFA: React.FC<TwoFAProps> = ({ viewTwoFA, userIdString }) => {
+const TwoFA: React.FC<TwoFAProps> = ({
+  viewTwoFA,
+  userIdString,
+  setIsLoggedIn,
+}) => {
   const [pin, setPin] = useState("");
 
   const toast = useToast();
@@ -33,6 +38,7 @@ const TwoFA: React.FC<TwoFAProps> = ({ viewTwoFA, userIdString }) => {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoggedIn(true);
     } catch (error) {
       console.error("Error:", error);
     }
