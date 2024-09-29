@@ -4,7 +4,12 @@ import { useState } from "react";
 import logo from "../assets/logo.png";
 import { Box, Image } from "@chakra-ui/react";
 
-const Validate = () => {
+interface ValidateProps {
+  isLoggedIn: boolean;
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Validate: React.FC<ValidateProps> = ({ isLoggedIn, setIsLoggedIn }) => {
   const [selectSignup, setSelectSignup] = useState(false);
   const [show, setShow] = useState(false);
 
@@ -13,9 +18,12 @@ const Validate = () => {
   };
 
   const showPassword = () => setShow(!show);
+
+  console.log("isLoggedIn:", isLoggedIn); // This will log the value of isLoggedIn every time the component renders
+
   return (
     <Box
-      display={"flex"}
+      display={isLoggedIn ? "none" : "flex"}
       flexDir={{ base: "column", lg: "row" }}
       alignItems={"center"}
       justifyContent={{ base: "middle", lg: "center" }}
@@ -33,6 +41,7 @@ const Validate = () => {
         showPassword={showPassword}
         show={show}
         selectSignup={selectSignup}
+        setIsLoggedIn={setIsLoggedIn}
       />
       <Signup
         handleSelectSignup={handleSelectSignup}
