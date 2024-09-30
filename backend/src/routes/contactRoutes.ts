@@ -12,3 +12,4 @@ router.get("/getContacts/:userId", getContacts);
 router.delete("/deleteContact/:userId/:contactId", deleteContact);
 
 export default router;
+ 
