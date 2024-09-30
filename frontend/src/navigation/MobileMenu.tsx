@@ -9,6 +9,7 @@ import {
   Button,
   useDisclosure,
   Text,
+  Box,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 
@@ -16,13 +17,12 @@ const MobileMenu = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <div>
+    <Box display={{ base: "flex", lg: "none" }}>
       <Button
         // colorScheme="blue"
         background={"#3C4565 "}
         textColor={"#FFFFFF"}
         onClick={onOpen}
-        display={"flex"}
         alignSelf={"flex-start"}
       >
         <HamburgerIcon />
@@ -46,7 +46,7 @@ const MobileMenu = () => {
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-    </div>
+    </Box>
   );
 };
 
