@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import contactRoutes from "./routes/contactRoutes";
+import messageRoutes from "./routes/messageRoutes";
 import cors from "cors";
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.use(cors({ origin: "http://localhost:5173" }));
 app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/contacts", contactRoutes);
+app.use("/message", messageRoutes);
 
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
