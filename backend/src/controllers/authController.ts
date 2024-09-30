@@ -3,8 +3,6 @@ import { db } from "../index";
 import bcrypt from "bcrypt";
 import { transporter, fetchUser } from "../../utils";
 import { passwordMatch } from "../../utils";
-import { v4 as uuidv4 } from "uuid";
-import { User } from "../../User";
 
 export const login = async (req: Request, res: Response) => {
   const { email, plainPassword } = req.body;
