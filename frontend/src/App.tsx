@@ -1,20 +1,19 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import Home from "./components/Home";
-import Chat from "./components/Chat";
-import Profile from "./components/Profile";
-import NotFound from "./components/NotFound";
-
+import { Box, ChakraProvider } from "@chakra-ui/react";
+import { useState } from "react";
+import Validate from "./validateUser/Validate";
+import "./App.css";
+import Nav from "./navigation/Nav";
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/chat" element={<Chat />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  )
-};
+    <ChakraProvider>
+      <Box height={"100vh"}>
+        <Nav isLoggedIn={isLoggedIn} />
+        <Validate isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+      </Box>
+    </ChakraProvider>
+  );
+}
 
 export default App;
