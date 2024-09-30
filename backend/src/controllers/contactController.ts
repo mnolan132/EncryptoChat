@@ -103,42 +103,42 @@ export const getContacts = async (req: Request, res: Response) => {
   }
 };
 
-// export const deleteContact = async (req: Request, res: Response) => {
-//     const { userId, contactId } = req.params;
+export const deleteContact = async (req: Request, res: Response) => {
+    const { userId, contactId } = req.params;
 
-//   try {
-//     const userRef = db.ref(`users/${userId}`);
-//     const userSnapshot = await userRef.once("value");
-//     const userData = userSnapshot.val() as User;
+  try {
+    const userRef = db.ref(`users/${userId}`);
+    const userSnapshot = await userRef.once("value");
+    const userData = userSnapshot.val() as User;
 
-//     if (!userData) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-//     let contacts = userData.contacts || [];
-//     if (!contacts.includes(contactId)) {
-//       return res.status(404).json({ message: "Contact not found in user's contact list" });
-//     }
+    let contacts = userData.contacts || [];
+    if (!contacts.includes(contactId)) {
+      return res.status(404).json({ message: "Contact not found in user's contact list" });
+    }
 
-//     contacts = contacts.filter((id) => id !== contactId);
+    // Delete the contact from user's contact list and update the list
+    contacts = contacts.filter((id) => id !== contactId);
+    await userRef.update({ contacts });
 
-//     await userRef.update({ contacts });
+    res.status(200).json({ message: "Contact deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting contact:", error);
+    res.status(500).json({ message: "Failed to delete contact" });
 
-//     res.status(200).json({ message: "Contact deleted successfully" });
-//   } catch (error) {
-//     console.error("Error deleting contact:", error);
-//     res.status(500).json({ message: "Failed to delete contact" });
-
-//     contactsRef.once("value", (snapshot) => {
-//       if (snapshot.exists()) {
-//         const contacts = snapshot.val();
-//         res.status(200).json(contacts);
-//       } else {
-//         res.status(404).json({ message: "No contacts found for this user" });
-//       }
-//     });
-//   } catch (error) {
-//     console.error("Error fetching contacts", error);
-//     res.status(500).json({ message: "Failed to retrieve contacts" });
-//   }
-// }
+    // contactsRef.once("value", (snapshot) => {
+    //   if (snapshot.exists()) {
+    //     const contacts = snapshot.val();
+    //     res.status(200).json(contacts);
+    //   } else {
+    //     res.status(404).json({ message: "No contacts found for this user" });
+    //   }
+    // });
+  // } catch (error) {
+  //   console.error("Error fetching contacts", error);
+  //   res.status(500).json({ message: "Failed to retrieve contacts" });
+  }
+};
