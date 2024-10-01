@@ -1,4 +1,4 @@
-import { Box, Icon, Text, useDisclosure, Button } from "@chakra-ui/react";
+import { Box, Icon, Text, Button } from "@chakra-ui/react";
 import MobileMenu from "./MobileMenu";
 import { ImProfile } from "react-icons/im";
 import { HamburgerIcon, ChatIcon } from "@chakra-ui/icons";
