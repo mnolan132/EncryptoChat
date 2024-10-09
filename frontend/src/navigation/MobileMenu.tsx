@@ -1,7 +1,6 @@
 import {
   Drawer,
   DrawerBody,
-  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
@@ -19,7 +18,6 @@ const MobileMenu = () => {
   return (
     <Box display={{ base: "flex", lg: "none" }}>
       <Button
-        // colorScheme="blue"
         background={"#3C4565 "}
         textColor={"#FFFFFF"}
         onClick={onOpen}
