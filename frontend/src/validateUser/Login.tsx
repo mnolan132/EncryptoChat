@@ -59,6 +59,7 @@ const Login: React.FC<LoginProps> = ({
 
   const logIn = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    
     try {
       const response = await fetch("http://localhost:5001/auth/login", {
         method: "POST",
