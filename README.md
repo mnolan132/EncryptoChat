@@ -56,7 +56,16 @@ npm i
 npm install --save @chakra-ui/react
 ```
 ```bash
+npm install react-icons --save
+```
+```bash
 npm i vite
+```
+```bash
+npm i react-router-dom
+```
+```bash
+npm install js-cookie
 ```
 
 Run the backend: Ensure all the required dependencies are installed.

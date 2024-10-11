@@ -85,8 +85,15 @@ export const getContacts = async (req: Request, res: Response) => {
     // Show contact details
     const contactDetails = await Promise.all(
       contacts.map(async (contactId) => {
+        //console.log("Fetching details for contact ID: ", contactId);
         const contactRef = db.ref(`users/${contactId}`);
         const contactSnapshot = await contactRef.once("value");
+
+        if (!contactSnapshot.exists()) {
+          console.error(`Contact with ID ${contactId} does not exist`);
+          throw new Error(`Contact with ID ${contactId} not found`);
+        }
+
         const contactData = contactSnapshot.val();
         return {
           id: contactId,
@@ -128,17 +135,5 @@ export const deleteContact = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error deleting contact:", error);
     res.status(500).json({ message: "Failed to delete contact" });
-
-    // contactsRef.once("value", (snapshot) => {
-    //   if (snapshot.exists()) {
-    //     const contacts = snapshot.val();
-    //     res.status(200).json(contacts);
-    //   } else {
-    //     res.status(404).json({ message: "No contacts found for this user" });
-    //   }
-    // });
-  // } catch (error) {
-  //   console.error("Error fetching contacts", error);
-  //   res.status(500).json({ message: "Failed to retrieve contacts" });
   }
 };

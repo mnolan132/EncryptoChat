@@ -11,6 +11,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
+import { Link } from "react-router-dom";
 
 const MobileMenu = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -38,9 +39,12 @@ const MobileMenu = () => {
             <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
               Messages
             </Text>
-            <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-              Contacts
-            </Text>
+            <Link to="/contacts" onClick={onClose}>
+              <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
+                Contacts
+              </Text>
+            </Link>
+            
           </DrawerBody>
         </DrawerContent>
       </Drawer>
