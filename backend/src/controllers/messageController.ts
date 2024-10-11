@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { db } from "../index";
-import { getUserIdFromEmail } from "../../utils";
+import { getUserIdFromEmail, getConversationId } from "../../utils";
 import { Message } from "../../Message";
 
 // Assuming this is your message structure
@@ -12,20 +12,16 @@ interface ChatMessage {
 }
 
 export const newMessage = async (req: Request, res: Response) => {
-  const { senderId, recipientEmail, messageContent } = req.body;
+  const { senderId, recipientId, messageContent } = req.body;
 
-  if (!senderId || !recipientEmail || !messageContent) {
+  if (!senderId || !recipientId || !messageContent) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   const timestamp = new Date().toISOString(); // Use ISO string format for consistent timestamp
 
   try {
-    const recipientId = await getUserIdFromEmail(recipientEmail);
-
-    if (!recipientId) {
-      return res.status(404).json({ message: "Recipient not found" });
-    }
+    const conversationId = getConversationId(senderId, recipientId);
 
     const message = new Message(
       senderId,
@@ -34,8 +30,10 @@ export const newMessage = async (req: Request, res: Response) => {
       timestamp
     );
 
-    // Example: Save the message to Firebase Realtime Database
-    const messageRef = db.ref(`messages`).push();
+    // Save the message to the conversation thread
+    const messageRef = db
+      .ref(`conversations/${conversationId}/messages`)
+      .push();
     await messageRef.set(message);
 
     res.status(201).json({
@@ -56,32 +54,40 @@ export const getMessages = async (req: Request, res: Response) => {
   }
 
   try {
-    // Get the userId for the specified email
     const userId = await getUserIdFromEmail(email);
 
     if (!userId) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Fetch messages where the user is either the sender or recipient
-    const messagesRef = db.ref("messages");
-    const snapshot = await messagesRef.once("value");
+    // Fetch all conversations
+    const conversationsRef = db.ref("conversations");
+    const snapshot = await conversationsRef.once("value");
 
     if (!snapshot.exists()) {
-      return res.status(404).json({ message: "No messages found" });
+      return res.status(404).json({ message: "No conversations found" });
     }
 
-    const allMessages = snapshot.val() as Record<string, ChatMessage>;
-    console.log("All messages:", allMessages);
+    const allConversations = snapshot.val();
+    const userMessages: Array<{
+      id: string;
+      conversationId: string;
+      message: ChatMessage;
+    }> = [];
 
-    const userMessages = Object.entries(allMessages)
-      .filter(
-        ([_, message]) =>
-          message.senderId === userId || message.recipientId === userId
-      )
-      .map(([key, message]) => ({ id: key, ...message }));
+    // Iterate over each conversation
+    for (const conversationId in allConversations) {
+      const messages = allConversations[conversationId].messages;
 
-    console.log("Filtered messages for user:", userMessages);
+      for (const messageId in messages) {
+        const message = messages[messageId] as ChatMessage;
+
+        // Check if the user is part of the conversation (sender or recipient)
+        if (message.senderId === userId || message.recipientId === userId) {
+          userMessages.push({ id: messageId, conversationId, message });
+        }
+      }
+    }
 
     if (userMessages.length === 0) {
       return res

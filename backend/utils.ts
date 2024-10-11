@@ -73,3 +73,7 @@ export const transporter = nodemailer.createTransport({
     pass: process.env.GMAIL_PASS,
   },
 });
+
+export const getConversationId = (senderId: string, recipientId: string) => {
+  return [senderId, recipientId].sort().join("_");
+};
