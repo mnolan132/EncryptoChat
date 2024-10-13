@@ -4,6 +4,7 @@ import { ImProfile } from "react-icons/im";
 import { HamburgerIcon, ChatIcon } from "@chakra-ui/icons";
 import { RiContactsFill } from "react-icons/ri";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 interface NavProps {
   isLoggedIn: boolean;
@@ -83,6 +84,7 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn }) => {
             m={"10px"}
             display={expandMenu ? "flex" : "block"}
           >
+            <Link to="/contacts">
             <Icon
               as={RiContactsFill}
               height={"30px"}
@@ -95,6 +97,7 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn }) => {
             >
               Contacts
             </Text>
+            </Link>
           </Box>
         </Box>
       </Box>
