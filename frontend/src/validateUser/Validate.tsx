@@ -4,12 +4,25 @@ import { useState } from "react";
 import logo from "../assets/logo.png";
 import { Box, Image } from "@chakra-ui/react";
 
+type User = {
+  email: string;
+  firstName: string;
+  userId: string;
+  lastName: string;
+};
 interface ValidateProps {
   isLoggedIn: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  user: null | User;
+  setUser: React.Dispatch<React.SetStateAction<null | User>>;
 }
 
-const Validate: React.FC<ValidateProps> = ({ isLoggedIn, setIsLoggedIn }) => {
+const Validate: React.FC<ValidateProps> = ({
+  isLoggedIn,
+  setIsLoggedIn,
+  user,
+  setUser,
+}) => {
   const [selectSignup, setSelectSignup] = useState(false);
   const [show, setShow] = useState(false);
 
@@ -42,6 +55,8 @@ const Validate: React.FC<ValidateProps> = ({ isLoggedIn, setIsLoggedIn }) => {
         show={show}
         selectSignup={selectSignup}
         setIsLoggedIn={setIsLoggedIn}
+        setUser={setUser}
+        user={user}
       />
       <Signup
         handleSelectSignup={handleSelectSignup}

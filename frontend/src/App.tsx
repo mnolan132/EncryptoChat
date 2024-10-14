@@ -5,18 +5,35 @@ import Validate from "./validateUser/Validate";
 import "./App.css";
 import Nav from "./navigation/Nav";
 import ContactsPage from "./contact/Contact";
+import Messages from "./messages/Messages";
+
+type User = {
+  email: string;
+  firstName: string;
+  userId: string;
+  lastName: string;
+};
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<null | User>(null);
   return (
     <ChakraProvider>
       <Box height={"100vh"}>
         <Router>
           <Nav isLoggedIn={isLoggedIn} />
-          <Validate isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
-          <Routes>
-            <Route path="/contacts" element={<ContactsPage />}/>
-          </Routes>
+          <Validate
+            isLoggedIn={isLoggedIn}
+            setIsLoggedIn={setIsLoggedIn}
+            setUser={setUser}
+            user={user}
+          />
+          <Box mt={"60px"} ml={{ base: "0px", lg: "73px" }} background={"red"}>
+            <Routes>
+              <Route path="/contacts" element={<ContactsPage />} />
+              <Route path="/messages" element={<Messages user={user} />} />
+            </Routes>
+          </Box>
         </Router>
       </Box>
     </ChakraProvider>
