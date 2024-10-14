@@ -1,20 +1,55 @@
 import { Box, Input, Text, Button, useToast } from "@chakra-ui/react";
 import { useState } from "react";
 
+type User = {
+  email: string;
+  firstName: string;
+  userId: string;
+  lastName: string;
+};
+
 interface TwoFAProps {
   viewTwoFA: boolean;
   userIdString: null | string;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  setUser: React.Dispatch<React.SetStateAction<null | User>>;
+  user: null | User;
 }
 
 const TwoFA: React.FC<TwoFAProps> = ({
   viewTwoFA,
   userIdString,
   setIsLoggedIn,
+  setUser,
+  user,
 }) => {
   const [pin, setPin] = useState("");
 
   const toast = useToast();
+
+  const getUser = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(
+        `http://localhost:5001/user/${userIdString}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(`Testing getUser function, user data: ${data}`);
+      setUser(data);
+      console.log(`user state data: ${user}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const verify2fa = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -39,6 +74,7 @@ const TwoFA: React.FC<TwoFAProps> = ({
         isClosable: true,
       });
       setIsLoggedIn(true);
+      getUser(e);
     } catch (error) {
       console.error("Error:", error);
     }

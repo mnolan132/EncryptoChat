@@ -66,39 +66,41 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn }) => {
               Profile
             </Text>
           </Box>
-          <Box
-            height={expandMenu ? "50px" : "65px"}
-            m={"10px"}
-            display={expandMenu ? "flex" : "block"}
-          >
-            <ChatIcon h={"30px"} w={"30px"} mx={expandMenu ? "12px" : 0} />
-            <Text
-              fontSize={expandMenu ? "medium" : "xs"}
-              mx={expandMenu ? "10px" : 0}
+          <Link to="/messages">
+            <Box
+              height={expandMenu ? "50px" : "65px"}
+              m={"10px"}
+              display={expandMenu ? "flex" : "block"}
             >
-              Messages
-            </Text>
-          </Box>
-          <Box
-            height={expandMenu ? "50px" : "65px"}
-            m={"10px"}
-            display={expandMenu ? "flex" : "block"}
-          >
-            <Link to="/contacts">
-            <Icon
-              as={RiContactsFill}
-              height={"30px"}
-              width={"30px"}
-              mx={expandMenu ? "12px" : 0}
-            />
-            <Text
-              fontSize={expandMenu ? "medium" : "xs"}
-              mx={expandMenu ? "10px" : 0}
+              <ChatIcon h={"30px"} w={"30px"} mx={expandMenu ? "12px" : 0} />
+              <Text
+                fontSize={expandMenu ? "medium" : "xs"}
+                mx={expandMenu ? "10px" : 0}
+              >
+                Messages
+              </Text>
+            </Box>
+          </Link>
+          <Link to="/contacts">
+            <Box
+              height={expandMenu ? "50px" : "65px"}
+              m={"10px"}
+              display={expandMenu ? "flex" : "block"}
             >
-              Contacts
-            </Text>
-            </Link>
-          </Box>
+              <Icon
+                as={RiContactsFill}
+                height={"30px"}
+                width={"30px"}
+                mx={expandMenu ? "12px" : 0}
+              />
+              <Text
+                fontSize={expandMenu ? "medium" : "xs"}
+                mx={expandMenu ? "10px" : 0}
+              >
+                Contacts
+              </Text>
+            </Box>
+          </Link>
         </Box>
       </Box>
     </Box>
