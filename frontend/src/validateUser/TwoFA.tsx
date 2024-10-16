@@ -4,7 +4,7 @@ import { useState } from "react";
 type User = {
   email: string;
   firstName: string;
-  userId: string;
+  id: string;
   lastName: string;
 };
 

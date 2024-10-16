@@ -36,15 +36,16 @@ const MobileMenu = () => {
             <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
               Profile
             </Text>
-            <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-              Messages
-            </Text>
+            <Link to="/messages" onClick={onClose}>
+              <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
+                Messages
+              </Text>
+            </Link>
             <Link to="/contacts" onClick={onClose}>
               <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
                 Contacts
               </Text>
             </Link>
-            
           </DrawerBody>
         </DrawerContent>
       </Drawer>

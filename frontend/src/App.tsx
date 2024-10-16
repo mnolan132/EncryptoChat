@@ -5,12 +5,12 @@ import Validate from "./validateUser/Validate";
 import "./App.css";
 import Nav from "./navigation/Nav";
 import ContactsPage from "./contact/Contact";
-import Messages from "./messages/Messages";
+import Conversations from "./messages/Conversations";
 
 type User = {
   email: string;
   firstName: string;
-  userId: string;
+  id: string;
   lastName: string;
 };
 
@@ -28,10 +28,10 @@ function App() {
             setUser={setUser}
             user={user}
           />
-          <Box mt={"60px"} ml={{ base: "0px", lg: "73px" }} background={"red"}>
+          <Box mt={"60px"} pl={{ base: "0px", lg: "73px" }} w={"100vw"}>
             <Routes>
               <Route path="/contacts" element={<ContactsPage />} />
-              <Route path="/messages" element={<Messages user={user} />} />
+              <Route path="/messages" element={<Conversations user={user} />} />
             </Routes>
           </Box>
         </Router>

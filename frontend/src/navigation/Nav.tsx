@@ -36,6 +36,7 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn }) => {
         color={"#ffffff"}
         display={{ base: "none", lg: "block" }}
         minW={expandMenu ? "250px" : 0}
+        zIndex={3}
       >
         <Box height={"50px"} m={"10px"} position={"fixed"}>
           <Button

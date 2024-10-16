@@ -7,7 +7,7 @@ import { Box, Image } from "@chakra-ui/react";
 type User = {
   email: string;
   firstName: string;
-  userId: string;
+  id: string;
   lastName: string;
 };
 interface ValidateProps {

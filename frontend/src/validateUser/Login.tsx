@@ -15,7 +15,7 @@ import TwoFA from "./TwoFA";
 type User = {
   email: string;
   firstName: string;
-  userId: string;
+  id: string;
   lastName: string;
 };
 interface LoginProps {
