@@ -1,10 +1,10 @@
 import { Box, Input, Text, Button, useToast } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type User = {
   email: string;
   firstName: string;
-  userId: string;
+  id: string;
   lastName: string;
 };
 
@@ -24,8 +24,15 @@ const TwoFA: React.FC<TwoFAProps> = ({
   user,
 }) => {
   const [pin, setPin] = useState("");
-
   const toast = useToast();
+
+  // Watch for changes in the `user` state and save to localStorage when it changes
+  useEffect(() => {
+    if (user) {
+      console.log("Saving user to localStorage:", user);
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+  }, [user]); // This will run whenever the `user` state changes
 
   const getUser = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -43,9 +50,10 @@ const TwoFA: React.FC<TwoFAProps> = ({
         throw new Error(`Error: ${response.status}`);
       }
       const data = await response.json();
-      console.log(`Testing getUser function, user data: ${data}`);
+      console.log(`Testing getUser function, user data from backend: `, data);
+
+      // Set user data in state
       setUser(data);
-      console.log(`user state data: ${user}`);
     } catch (error) {
       console.error(error);
     }
@@ -65,7 +73,7 @@ const TwoFA: React.FC<TwoFAProps> = ({
         throw new Error(`Error: ${response.status}`);
       }
       const data = await response.json();
-      console.log(data);
+
       toast({
         title: "Log in successful",
         description: "Welcome back",
@@ -73,8 +81,13 @@ const TwoFA: React.FC<TwoFAProps> = ({
         duration: 9000,
         isClosable: true,
       });
+
+      // Set isLoggedIn and fetch user data
       setIsLoggedIn(true);
-      getUser(e);
+      await getUser(e); // Ensure this is awaited
+
+      // Save isLoggedIn status to localStorage
+      localStorage.setItem("isLoggedIn", "true");
     } catch (error) {
       console.error("Error:", error);
     }
