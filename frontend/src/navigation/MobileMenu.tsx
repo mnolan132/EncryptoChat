@@ -37,16 +37,17 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ handleLogOut }) => {
             <DrawerCloseButton m={"3px"} textColor={"#FFFFFF"} />
           </DrawerHeader>
           <DrawerBody textColor={"#FFFFFF"} mt={"20px"}>
-<<<<<<< Updated upstream
             <Box
               display={"flex"}
               flexDir={"column"}
               justifyContent={"space-between"}
             >
               <Box>
-                <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-                  Profile
-                </Text>
+                <Link to="/profile" onClick={onClose}>
+                  <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
+                    Profile
+                  </Text>
+                </Link>
                 <Link to="/messages" onClick={onClose}>
                   <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
                     Messages
@@ -60,23 +61,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ handleLogOut }) => {
               </Box>
               <Button onClick={handleLogOut}>Log Out</Button>
             </Box>
-=======
-            <Link to="/profile" onClick={onClose} >
-              <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-                Profile
-              </Text>
-            </Link>
-            
-            <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-              Messages
-            </Text>
-            <Link to="/contacts" onClick={onClose}>
-              <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-                Contacts
-              </Text>
-            </Link>
-            
->>>>>>> Stashed changes
           </DrawerBody>
         </DrawerContent>
       </Drawer>
