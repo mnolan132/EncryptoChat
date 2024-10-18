@@ -6,15 +6,31 @@ import { RiContactsFill } from "react-icons/ri";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+type User = {
+  email: string;
+  firstName: string;
+  id: string;
+  lastName: string;
+};
+
 interface NavProps {
   isLoggedIn: boolean;
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  setUser: (value: React.SetStateAction<User | null>) => void;
 }
 
-const Nav: React.FC<NavProps> = ({ isLoggedIn }) => {
+const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
   const [expandMenu, setExpandMenu] = useState(false);
 
   const toggleMenu = () => {
     setExpandMenu(!expandMenu);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser(null);
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("user");
   };
 
   return (
@@ -27,7 +43,7 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn }) => {
         justifyContent={"flex-start"}
         alignItems={"center"}
       >
-        <MobileMenu />
+        <MobileMenu handleLogOut={handleLogout} />
       </Box>
       <Box
         height={"100vh"}
@@ -36,6 +52,7 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn }) => {
         color={"#ffffff"}
         display={{ base: "none", lg: "block" }}
         minW={expandMenu ? "250px" : 0}
+        zIndex={3}
       >
         <Box height={"50px"} m={"10px"} position={"fixed"}>
           <Button
@@ -47,58 +64,72 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn }) => {
             <HamburgerIcon />
           </Button>
         </Box>
-        <Box mt={"60px"}>
-          <Box
-            height={expandMenu ? "50px" : "65px"}
-            m={"10px"}
-            display={expandMenu ? "flex" : "block"}
-          >
-            <Icon
-              as={ImProfile}
-              height={"30px"}
-              width={"30px"}
-              mx={expandMenu ? "12px" : 0}
-            />
-            <Text
-              fontSize={expandMenu ? "medium" : "xs"}
-              mx={expandMenu ? "10px" : 0}
+        <Box
+          display={"flex"}
+          flexDir={"column"}
+          justifyContent={"space-between"}
+        >
+          <Box mt={"60px"}>
+            <Box
+              height={expandMenu ? "50px" : "65px"}
+              m={"10px"}
+              display={expandMenu ? "flex" : "block"}
             >
-              Profile
-            </Text>
-          </Box>
-          <Box
-            height={expandMenu ? "50px" : "65px"}
-            m={"10px"}
-            display={expandMenu ? "flex" : "block"}
-          >
-            <ChatIcon h={"30px"} w={"30px"} mx={expandMenu ? "12px" : 0} />
-            <Text
-              fontSize={expandMenu ? "medium" : "xs"}
-              mx={expandMenu ? "10px" : 0}
-            >
-              Messages
-            </Text>
-          </Box>
-          <Box
-            height={expandMenu ? "50px" : "65px"}
-            m={"10px"}
-            display={expandMenu ? "flex" : "block"}
-          >
+              <Icon
+                as={ImProfile}
+                height={"30px"}
+                width={"30px"}
+                mx={expandMenu ? "12px" : 0}
+              />
+              <Text
+                fontSize={expandMenu ? "medium" : "xs"}
+                mx={expandMenu ? "10px" : 0}
+              >
+                Profile
+              </Text>
+            </Box>
+            <Link to="/messages">
+              <Box
+                height={expandMenu ? "50px" : "65px"}
+                m={"10px"}
+                display={expandMenu ? "flex" : "block"}
+              >
+                <ChatIcon h={"30px"} w={"30px"} mx={expandMenu ? "12px" : 0} />
+                <Text
+                  fontSize={expandMenu ? "medium" : "xs"}
+                  mx={expandMenu ? "10px" : 0}
+                >
+                  Messages
+                </Text>
+              </Box>
+            </Link>
             <Link to="/contacts">
-            <Icon
-              as={RiContactsFill}
-              height={"30px"}
-              width={"30px"}
-              mx={expandMenu ? "12px" : 0}
-            />
-            <Text
-              fontSize={expandMenu ? "medium" : "xs"}
-              mx={expandMenu ? "10px" : 0}
-            >
-              Contacts
-            </Text>
+              <Box
+                height={expandMenu ? "50px" : "65px"}
+                m={"10px"}
+                display={expandMenu ? "flex" : "block"}
+              >
+                <Icon
+                  as={RiContactsFill}
+                  height={"30px"}
+                  width={"30px"}
+                  mx={expandMenu ? "12px" : 0}
+                />
+                <Text
+                  fontSize={expandMenu ? "medium" : "xs"}
+                  mx={expandMenu ? "10px" : 0}
+                >
+                  Contacts
+                </Text>
+              </Box>
             </Link>
           </Box>
+          <Button
+            display={expandMenu ? "block" : "none"}
+            onClick={handleLogout}
+          >
+            Log Out
+          </Button>
         </Box>
       </Box>
     </Box>

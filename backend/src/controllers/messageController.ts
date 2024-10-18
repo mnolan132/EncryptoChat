@@ -47,15 +47,9 @@ export const newMessage = async (req: Request, res: Response) => {
 };
 
 export const getMessages = async (req: Request, res: Response) => {
-  const { email } = req.params;
-
-  if (!email || typeof email !== "string") {
-    return res.status(400).json({ message: "Valid user email is required" });
-  }
+  const { userId } = req.params;
 
   try {
-    const userId = await getUserIdFromEmail(email);
-
     if (!userId) {
       return res.status(404).json({ message: "User not found" });
     }

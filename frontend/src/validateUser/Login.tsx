@@ -12,12 +12,20 @@ import {
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import TwoFA from "./TwoFA";
 
+type User = {
+  email: string;
+  firstName: string;
+  id: string;
+  lastName: string;
+};
 interface LoginProps {
   handleSelectSignup: () => void;
   showPassword: () => void;
   show: boolean;
   selectSignup: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  setUser: React.Dispatch<React.SetStateAction<null | User>>;
+  user: null | User;
 }
 
 const Login: React.FC<LoginProps> = ({
@@ -26,6 +34,8 @@ const Login: React.FC<LoginProps> = ({
   show,
   selectSignup,
   setIsLoggedIn,
+  setUser,
+  user,
 }): JSX.Element => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,7 +69,7 @@ const Login: React.FC<LoginProps> = ({
 
   const logIn = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    
+
     try {
       const response = await fetch("http://localhost:5001/auth/login", {
         method: "POST",
@@ -142,6 +152,8 @@ const Login: React.FC<LoginProps> = ({
         userIdString={userIdString}
         viewTwoFA={viewTwoFA}
         setIsLoggedIn={setIsLoggedIn}
+        setUser={setUser}
+        user={user}
       />
     </>
   );
