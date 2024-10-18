@@ -1,5 +1,5 @@
 import { Box, ChakraProvider } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Validate from "./validateUser/Validate";
 import "./App.css";
@@ -17,11 +17,26 @@ type User = {
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<null | User>(null);
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("isLoggedIn");
+    const storedUser = localStorage.getItem("user");
+
+    if (loggedIn && storedUser) {
+      setIsLoggedIn(true);
+      setUser(JSON.parse(storedUser)); // Restore the user state
+    }
+  }, []);
+
   return (
     <ChakraProvider>
       <Box height={"100vh"}>
         <Router>
-          <Nav isLoggedIn={isLoggedIn} />
+          <Nav
+            isLoggedIn={isLoggedIn}
+            setIsLoggedIn={setIsLoggedIn}
+            setUser={setUser}
+          />
           <Validate
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}

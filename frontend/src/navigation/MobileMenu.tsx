@@ -13,7 +13,11 @@ import {
 import { HamburgerIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 
-const MobileMenu = () => {
+interface MobileMenuProps {
+  handleLogOut: () => void;
+}
+
+const MobileMenu: React.FC<MobileMenuProps> = ({ handleLogOut }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -33,19 +37,28 @@ const MobileMenu = () => {
             <DrawerCloseButton m={"3px"} textColor={"#FFFFFF"} />
           </DrawerHeader>
           <DrawerBody textColor={"#FFFFFF"} mt={"20px"}>
-            <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-              Profile
-            </Text>
-            <Link to="/messages" onClick={onClose}>
-              <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-                Messages
-              </Text>
-            </Link>
-            <Link to="/contacts" onClick={onClose}>
-              <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-                Contacts
-              </Text>
-            </Link>
+            <Box
+              display={"flex"}
+              flexDir={"column"}
+              justifyContent={"space-between"}
+            >
+              <Box>
+                <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
+                  Profile
+                </Text>
+                <Link to="/messages" onClick={onClose}>
+                  <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
+                    Messages
+                  </Text>
+                </Link>
+                <Link to="/contacts" onClick={onClose}>
+                  <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
+                    Contacts
+                  </Text>
+                </Link>
+              </Box>
+              <Button onClick={handleLogOut}>Log Out</Button>
+            </Box>
           </DrawerBody>
         </DrawerContent>
       </Drawer>
