@@ -1,22 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Text,
-  useToast,
-  Image,
-  Flex,
-  Modal,
-  ModalOverlay,
-  ModalBody,
-  ModalFooter,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  useDisclosure,
-  Input,
-  useBreakpointValue,
-  Center,
+import { 
+  Box, Button, Text, useToast, Image, Flex, Modal, 
+  ModalOverlay, ModalBody,ModalFooter, ModalContent,
+  ModalHeader, ModalCloseButton, useDisclosure, Input,
+  useBreakpointValue, VStack, Spinner
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AddIcon, DeleteIcon, EmailIcon, SettingsIcon } from "@chakra-ui/icons";
@@ -39,7 +26,7 @@ const ContactsPage: React.FC = () => {
 
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  // Responsive layout detection
+  // Mobile layout
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
   // Fetch contacts on component mount
@@ -47,6 +34,7 @@ const ContactsPage: React.FC = () => {
     fetchContacts();
   }, []);
 
+  // Get contacts
   const fetchContacts = async () => {
     setLoading(true);
     try {
@@ -66,6 +54,7 @@ const ContactsPage: React.FC = () => {
     }
   };
 
+  // Add contact by entering name and email
   const handleAddContact = async () => {
     if (!name || !email) {
       toast({
@@ -103,6 +92,7 @@ const ContactsPage: React.FC = () => {
     }
   };
 
+  // Delete contact in the database using userId and contactId
   const handleDeleteContact = async (contactId: string) => {
     console.log("Deleting contact with ID:", contactId)
     try {
@@ -127,29 +117,18 @@ const ContactsPage: React.FC = () => {
     }
   };  
 
+  // Shows each contact details
   const handleContactClick = (contact: Contact) => {
     setSelectedContact(contact);
   };
 
-  return (
-    <Box p={6} minH="100vh" bg="gray.50">
-      <Flex
-        direction={{ base: "column", lg: "row" }}
-        maxW="100%"
-        justifyContent="center"
-        alignItems={{ base: "flex-start", lg: "center" }}
-      >
+  if (loading) return <Spinner />;
+
+  return ( 
+    <VStack bg="white" p={4} w={[300, 400, 500]} height={{base: "100%", md: "50%", xl: "25%"}}>
+      <Box flexShrink={0}>
         {/* Contact list*/}
-        <Box
-          p={4}
-          maxW={{ base: "100%", lg: "40%" }}
-          w="100%"
-          borderRadius="lg"
-          boxShadow="none"
-          bg="white"
-          mb={{ base: 6, lg: 0 }}
-          mt={{ base: 10, lg: 0 }}
-        >
+        <Box>
           <Box textAlign="center" mb={6}>
             <Button onClick={onOpen} w="100%" leftIcon={<AddIcon />}>
               Add Contact
@@ -266,8 +245,8 @@ const ContactsPage: React.FC = () => {
             </Box>
           )
         )}
-      </Flex>
-    </Box>
+      </Box>
+    </VStack>
    
   );
 };
