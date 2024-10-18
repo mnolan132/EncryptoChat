@@ -1,7 +1,8 @@
 import { Box, Button, Icon, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { BiMessageEdit } from "react-icons/bi";
-import MessageThread from "./Message";
+import MessageThread from "./MessageThread";
+import { formatTimestamp } from "../utils";
 
 // Define the message structure types
 type Message = {
@@ -42,15 +43,6 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
   >(null); // Track selected conversation
-
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const day = date.getDate().toString().padStart(2, "0"); // Ensure it's two digits
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are zero-indexed
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${hours}:${minutes} ${day}/${month}`;
-  };
 
   // The async function to fetch messages
   const getMessages = async () => {
@@ -164,8 +156,15 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
     );
   };
 
+  // Get the other participant's ID
+  const getOtherParticipantId = (conversation: MessageData) => {
+    return user && user.id !== conversation.message.senderId
+      ? conversation.message.senderId
+      : conversation.message.recipientId;
+  };
+
   return (
-    <Box display={{ base: "block", lg: "flex" }}>
+    <Box display={{ base: "block", lg: "flex" }} height={"93vh"}>
       <Box w={{ base: "100%", lg: "50%" }} display={"flex"} flexDir={"column"}>
         <Button
           bg={"#0CCEC2"}
@@ -177,27 +176,16 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
             <Text>New Message</Text>
           </Box>
         </Button>
-        <Text fontSize={"xx-large"}>Messages</Text>
-        {user && (
-          <div>
-            {Object.keys(user).map((key) => (
-              <p key={key}>
-                {key}: {user[key as keyof User]}
-              </p>
-            ))}
-          </div>
-        )}
+        <Text textAlign={"left"} fontWeight={"medium"} fontSize={"x-large"}>
+          Conversations:
+        </Text>
         {messagesData && (
           <Box mt={4}>
-            <Text fontSize={"large"}>Conversations:</Text>
             {uniqueConversations.map((conversationId) => {
               const conversation = getLatestMessage(conversationId);
               if (!conversation) return null;
 
-              const otherParticipantId =
-                user && user.id !== conversation.message.senderId
-                  ? conversation.message.senderId
-                  : conversation.message.recipientId;
+              const otherParticipantId = getOtherParticipantId(conversation);
 
               const senderName =
                 conversation.message.senderId === user?.id
@@ -241,11 +229,19 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
         )}
       </Box>
 
-      <Box w={{ base: "100%", lg: "50%" }} p={4}>
+      <Box w={{ base: "100%", lg: "50%" }} px={4}>
         {selectedConversation ? (
           <MessageThread
             messages={getConversationMessages(selectedConversation)} // Pass the selected conversation's messages
             currentUserId={user?.id || ""} // Pass the current user's ID
+            otherParticipantName={
+              conversationNames[
+                getOtherParticipantId(getLatestMessage(selectedConversation)!)
+              ] || "Unknown"
+            } // Pass the other participant's name
+            recipientId={getOtherParticipantId(
+              getLatestMessage(selectedConversation)!
+            )}
           />
         ) : (
           <Text>No conversation selected.</Text>
