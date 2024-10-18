@@ -64,12 +64,53 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
             <HamburgerIcon />
           </Button>
         </Box>
+<<<<<<< Updated upstream
         <Box
           display={"flex"}
           flexDir={"column"}
           justifyContent={"space-between"}
         >
           <Box mt={"60px"}>
+=======
+        <Box mt={"60px"}>
+          <Box
+            height={expandMenu ? "50px" : "65px"}
+            m={"10px"}
+            display={expandMenu ? "flex" : "block"}
+          >
+            <Link to="/profile" >
+              <Icon
+                as={ImProfile}
+                height={"30px"}
+                width={"30px"}
+                mx={expandMenu ? "12px" : 0}
+              />
+              <Text
+                fontSize={expandMenu ? "medium" : "xs"}
+                mx={expandMenu ? "10px" : 0}
+              >
+                Profile
+              </Text>
+            </Link>
+            
+          </Box>
+          <Link to="/messages">
+            <Box
+              height={expandMenu ? "50px" : "65px"}
+              m={"10px"}
+              display={expandMenu ? "flex" : "block"}
+            >
+              <ChatIcon h={"30px"} w={"30px"} mx={expandMenu ? "12px" : 0} />
+              <Text
+                fontSize={expandMenu ? "medium" : "xs"}
+                mx={expandMenu ? "10px" : 0}
+              >
+                Messages
+              </Text>
+            </Box>
+          </Link>
+          <Link to="/contacts">
+>>>>>>> Stashed changes
             <Box
               height={expandMenu ? "50px" : "65px"}
               m={"10px"}

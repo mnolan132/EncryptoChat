@@ -5,6 +5,7 @@ import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import contactRoutes from "./routes/contactRoutes";
 import messageRoutes from "./routes/messageRoutes";
+import profileRoutes from "./routes/profileRoutes"
 import cors from "cors";
 
 dotenv.config();
@@ -19,7 +20,7 @@ admin.initializeApp({
   databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
 });
 
-export const db = admin.database(); // changed to real-time database
+export const db = admin.database();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -31,6 +32,7 @@ app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/contacts", contactRoutes);
 app.use("/message", messageRoutes);
+app.use("/profile", profileRoutes);
 
 app.get("/", (req, res) => {
   res.send("Encrypto-Chat");
