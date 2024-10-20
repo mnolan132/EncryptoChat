@@ -39,13 +39,13 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
   );
   const [conversationNames, setConversationNames] = useState<
     Record<string, string>
-  >({}); // Store the other user's names for each conversation
+  >({});
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
-  >(null); // Track selected conversation
+  >(null);
 
-  // The async function to fetch messages
-  const getMessages = async () => {
+  // Function to fetch messages from the database
+  const fetchMessages = async (): Promise<MessagesResponse | null> => {
     try {
       const response = await fetch(
         `http://localhost:5001/message/get-messages/${user?.id}`,
@@ -59,20 +59,32 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
-      const data: MessagesResponse = await response.json(); // Assuming the response matches the MessagesResponse type
-      setMessagesData(data); // Save the fetched messages to state
-      await fetchUserNames(data); // Fetch user names for the conversations
-      setDefaultConversation(data); // Set the most recent conversation as the default
+      return await response.json();
     } catch (error) {
       console.error("Error fetching messages:", error);
+      return null;
     }
   };
 
-  // The async function to fetch user names based on message data
+  // Function to check if new messages have been received
+  const checkForNewMessages = async () => {
+    const newMessagesData = await fetchMessages();
+    if (newMessagesData && newMessagesData.messages.length > 0) {
+      if (
+        !messagesData ||
+        newMessagesData.messages.length !== messagesData.messages.length
+      ) {
+        setMessagesData(newMessagesData); // Update state with new messages
+        await fetchUserNames(newMessagesData); // Fetch names again if needed
+        setDefaultConversation(newMessagesData); // Set default conversation
+      }
+    }
+  };
+
+  // Fetch user names based on message data
   const fetchUserNames = async (data: MessagesResponse) => {
     const conversations: Record<string, string> = {};
 
-    // Extract unique conversation participants (other than the logged-in user)
     const conversationParticipants = Array.from(
       new Set(
         data.messages.map((msg) =>
@@ -83,7 +95,6 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
       )
     );
 
-    // Fetch names for each participant
     await Promise.all(
       conversationParticipants.map(async (participantId) => {
         try {
@@ -102,38 +113,42 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
       })
     );
 
-    setConversationNames(conversations); // Save conversation names
+    setConversationNames(conversations);
   };
 
-  // Set the most recent conversation as the default
+  // Set the most recent conversation as default
   const setDefaultConversation = (data: MessagesResponse) => {
     if (!data || data.messages.length === 0) return;
-
-    // Sort messages by timestamp and get the most recent conversationId
     const sortedMessages = [...data.messages].sort(
       (a, b) =>
         new Date(b.message.timestamp).getTime() -
         new Date(a.message.timestamp).getTime()
     );
-
     setSelectedConversation(sortedMessages[0].conversationId);
   };
 
-  // Use useEffect to call the function when user is available
+  // useEffect to start polling every 3 seconds for new messages
   useEffect(() => {
     if (user && user.id) {
-      getMessages();
+      // Fetch messages initially
+      checkForNewMessages();
+
+      // Set interval to check every 3 seconds
+      const intervalId = setInterval(() => {
+        checkForNewMessages();
+      }, 3000); // 3000 ms = 3 seconds
+
+      // Clear interval on unmount
+      return () => clearInterval(intervalId);
     }
   }, [user]); // Only run when the user changes
 
-  // Get unique conversation IDs
   const uniqueConversations = messagesData
     ? Array.from(
         new Set(messagesData.messages.map((msg) => msg.conversationId))
       )
     : [];
 
-  // Get the latest message in a conversation
   const getLatestMessage = (conversationId: string) => {
     if (!messagesData) return null;
     const conversationMessages = messagesData.messages.filter(
@@ -149,14 +164,12 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
     });
   };
 
-  // Get all messages for the selected conversation
   const getConversationMessages = (conversationId: string) => {
     return messagesData?.messages.filter(
       (msg) => msg.conversationId === conversationId
     );
   };
 
-  // Get the other participant's ID
   const getOtherParticipantId = (conversation: MessageData) => {
     return user && user.id !== conversation.message.senderId
       ? conversation.message.senderId
@@ -200,7 +213,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
                   p={2}
                   borderY="1px solid black"
                   mt={2}
-                  onClick={() => setSelectedConversation(conversationId)} // Set conversation on click
+                  onClick={() => setSelectedConversation(conversationId)}
                   cursor="pointer"
                   bg={
                     selectedConversation === conversationId
@@ -232,16 +245,16 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
       <Box w={{ base: "100%", lg: "50%" }} px={4}>
         {selectedConversation ? (
           <MessageThread
-            messages={getConversationMessages(selectedConversation)} // Pass the selected conversation's messages
-            currentUserId={user?.id || ""} // Pass the current user's ID
+            messages={getConversationMessages(selectedConversation)}
+            currentUserId={user?.id || ""}
             otherParticipantName={
               conversationNames[
                 getOtherParticipantId(getLatestMessage(selectedConversation)!)
               ] || "Unknown"
-            } // Pass the other participant's name
+            }
             recipientId={getOtherParticipantId(
               getLatestMessage(selectedConversation)!
-            )}
+            )} // Passing recipientId
           />
         ) : (
           <Text>No conversation selected.</Text>
