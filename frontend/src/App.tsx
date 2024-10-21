@@ -32,29 +32,29 @@ function App() {
 
   return (
     <ChakraProvider>
-    <Box height={"100vh"}>
-      <Router>
-        <Nav
-          isLoggedIn={isLoggedIn}
-          setIsLoggedIn={setIsLoggedIn}
-          setUser={setUser}
-        />
-        <Validate
-          isLoggedIn={isLoggedIn}
-          setIsLoggedIn={setIsLoggedIn}
-          setUser={setUser}
-          user={user}
-        />
-        <Box mt={"60px"} pl={{ base: "0px", lg: "73px" }} w={"100vw"}>
-          <Routes>
-            <Route path="/contacts" element={<ContactsPage />} />
-            <Route path="/messages" element={<Conversations user={user} />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Routes>
-        </Box>
-      </Router>
-    </Box>
-  </ChakraProvider>
+      <Box height={"100vh"}>
+        <Router>
+          <Nav
+            isLoggedIn={isLoggedIn}
+            setIsLoggedIn={setIsLoggedIn}
+            setUser={setUser}
+          />
+          <Validate
+            isLoggedIn={isLoggedIn}
+            setIsLoggedIn={setIsLoggedIn}
+            setUser={setUser}
+            user={user}
+          />
+          <Box mt={"60px"} pl={{ base: "0px", lg: "73px" }} w={"100vw"}>
+            <Routes>
+              <Route path="/contacts" element={<ContactsPage />} />
+              <Route path="/messages" element={<Conversations user={user} />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Routes>
+          </Box>
+        </Router>
+      </Box>
+    </ChakraProvider>
   );
 }
 

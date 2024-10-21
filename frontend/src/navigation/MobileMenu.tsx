@@ -27,6 +27,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ handleLogOut }) => {
         textColor={"#FFFFFF"}
         onClick={onOpen}
         alignSelf={"flex-start"}
+        m={"10px"}
       >
         <HamburgerIcon />
       </Button>
