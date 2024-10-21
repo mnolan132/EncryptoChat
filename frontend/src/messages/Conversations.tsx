@@ -1,4 +1,4 @@
-import { Box, Button, Icon, Text } from "@chakra-ui/react";
+import { Box, Button, Icon, Text, useBreakpointValue } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { BiMessageEdit } from "react-icons/bi";
 import MessageThread from "./MessageThread";
@@ -43,6 +43,10 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
   >(null);
+  const [isViewingThread, setIsViewingThread] = useState(false); // New state to track mobile view
+
+  // Check if we are on mobile
+  const isMobile = useBreakpointValue({ base: true, lg: false });
 
   // Function to fetch messages from the database
   const fetchMessages = async (): Promise<MessagesResponse | null> => {
@@ -51,14 +55,10 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
         `http://localhost:5001/message/get-messages/${user?.id}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
       return await response.json();
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -74,17 +74,15 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
         !messagesData ||
         newMessagesData.messages.length !== messagesData.messages.length
       ) {
-        setMessagesData(newMessagesData); // Update state with new messages
-        await fetchUserNames(newMessagesData); // Fetch names again if needed
-        setDefaultConversation(newMessagesData); // Set default conversation
+        setMessagesData(newMessagesData);
+        await fetchUserNames(newMessagesData);
+        setDefaultConversation(newMessagesData);
       }
     }
   };
 
-  // Fetch user names based on message data
   const fetchUserNames = async (data: MessagesResponse) => {
     const conversations: Record<string, string> = {};
-
     const conversationParticipants = Array.from(
       new Set(
         data.messages.map((msg) =>
@@ -112,11 +110,9 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
         }
       })
     );
-
     setConversationNames(conversations);
   };
 
-  // Set the most recent conversation as default
   const setDefaultConversation = (data: MessagesResponse) => {
     if (!data || data.messages.length === 0) return;
     const sortedMessages = [...data.messages].sort(
@@ -127,21 +123,13 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
     setSelectedConversation(sortedMessages[0].conversationId);
   };
 
-  // useEffect to start polling every 3 seconds for new messages
   useEffect(() => {
     if (user && user.id) {
-      // Fetch messages initially
       checkForNewMessages();
-
-      // Set interval to check every 3 seconds
-      const intervalId = setInterval(() => {
-        checkForNewMessages();
-      }, 3000); // 3000 ms = 3 seconds
-
-      // Clear interval on unmount
+      const intervalId = setInterval(() => checkForNewMessages(), 3000);
       return () => clearInterval(intervalId);
     }
-  }, [user]); // Only run when the user changes
+  }, [user]);
 
   const uniqueConversations = messagesData
     ? Array.from(
@@ -155,13 +143,11 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
       (msg) => msg.conversationId === conversationId
     );
     if (conversationMessages.length === 0) return null;
-
-    return conversationMessages.reduce((latest, current) => {
-      return new Date(latest.message.timestamp) >
-        new Date(current.message.timestamp)
+    return conversationMessages.reduce((latest, current) =>
+      new Date(latest.message.timestamp) > new Date(current.message.timestamp)
         ? latest
-        : current;
-    });
+        : current
+    );
   };
 
   const getConversationMessages = (conversationId: string) => {
@@ -177,73 +163,90 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
   };
 
   return (
-    <Box display={{ base: "block", lg: "flex" }} height={"93vh"}>
-      <Box w={{ base: "100%", lg: "50%" }} display={"flex"} flexDir={"column"}>
-        <Button
-          bg={"#0CCEC2"}
-          my={"10px"}
-          mx={{ base: "10px", sm: "20px", md: "40px" }}
+    <Box
+      display={{ base: "block", lg: "flex" }}
+      height={"100%"}
+      overflowY={"auto"}
+    >
+      {(!isViewingThread || !isMobile) && (
+        <Box
+          w={{ base: "100%", lg: "50%" }}
+          display={"flex"}
+          flexDir={"column"}
         >
-          <Box display={"flex"} alignItems={"center"}>
-            <Icon as={BiMessageEdit} h={"30px"} w={"30px"} mx={"10px"} />
-            <Text>New Message</Text>
-          </Box>
-        </Button>
-        <Text textAlign={"left"} fontWeight={"medium"} fontSize={"x-large"}>
-          Conversations:
-        </Text>
-        {messagesData && (
-          <Box mt={4}>
-            {uniqueConversations.map((conversationId) => {
-              const conversation = getLatestMessage(conversationId);
-              if (!conversation) return null;
+          <Button
+            bg={"#0CCEC2"}
+            my={"10px"}
+            mx={{ base: "10px", sm: "20px", md: "40px" }}
+          >
+            <Box display={"flex"} alignItems={"center"}>
+              <Icon as={BiMessageEdit} h={"30px"} w={"30px"} mx={"10px"} />
+              <Text>New Message</Text>
+            </Box>
+          </Button>
+          <Text
+            textAlign={"left"}
+            fontWeight={"medium"}
+            fontSize={"x-large"}
+            borderBottom={"1px solid black"}
+          >
+            Conversations:
+          </Text>
+          {messagesData && (
+            <Box mt={0}>
+              {uniqueConversations.map((conversationId) => {
+                const conversation = getLatestMessage(conversationId);
+                if (!conversation) return null;
 
-              const otherParticipantId = getOtherParticipantId(conversation);
+                const otherParticipantId = getOtherParticipantId(conversation);
+                const senderName =
+                  conversation.message.senderId === user?.id
+                    ? "You"
+                    : conversationNames[conversation.message.senderId] ||
+                      conversation.message.senderId;
 
-              const senderName =
-                conversation.message.senderId === user?.id
-                  ? "You"
-                  : conversationNames[conversation.message.senderId] ||
-                    conversation.message.senderId;
-
-              return (
-                <Box
-                  textAlign={"left"}
-                  key={conversationId}
-                  p={2}
-                  borderY="1px solid black"
-                  mt={2}
-                  onClick={() => setSelectedConversation(conversationId)}
-                  cursor="pointer"
-                  bg={
-                    selectedConversation === conversationId
-                      ? "gray.200"
-                      : "transparent"
-                  }
-                >
-                  <Box display={"flex"} alignItems={"center"}>
-                    <Text fontWeight={"bold"} fontSize={"large"}>
-                      {otherParticipantId
-                        ? conversationNames[otherParticipantId] ||
-                          otherParticipantId
-                        : "Unknown"}
-                    </Text>
-                    <Text fontSize={"sm"} ml={"50px"}>
-                      {formatTimestamp(conversation.message.timestamp)}
+                return (
+                  <Box
+                    textAlign={"left"}
+                    key={conversationId}
+                    p={2}
+                    borderBottom="1px solid black"
+                    mt={0}
+                    onClick={() => {
+                      setSelectedConversation(conversationId);
+                      if (isMobile) setIsViewingThread(true);
+                    }}
+                    cursor="pointer"
+                    bg={
+                      selectedConversation === conversationId
+                        ? "gray.200"
+                        : "transparent"
+                    }
+                  >
+                    <Box display={"flex"} alignItems={"center"}>
+                      <Text fontWeight={"bold"} fontSize={"large"}>
+                        {otherParticipantId
+                          ? conversationNames[otherParticipantId] ||
+                            otherParticipantId
+                          : "Unknown"}
+                      </Text>
+                      <Text fontSize={"sm"} ml={"50px"}>
+                        {formatTimestamp(conversation.message.timestamp)}
+                      </Text>
+                    </Box>
+                    <Text>
+                      {senderName}: {conversation.message.messageContent}
                     </Text>
                   </Box>
-                  <Text>
-                    {senderName}: {conversation.message.messageContent}
-                  </Text>
-                </Box>
-              );
-            })}
-          </Box>
-        )}
-      </Box>
+                );
+              })}
+            </Box>
+          )}
+        </Box>
+      )}
 
-      <Box w={{ base: "100%", lg: "50%" }} px={4}>
-        {selectedConversation ? (
+      {selectedConversation && (!isMobile || isViewingThread) && (
+        <Box w={{ base: "100%", lg: "50%" }} px={4}>
           <MessageThread
             messages={getConversationMessages(selectedConversation)}
             currentUserId={user?.id || ""}
@@ -255,11 +258,12 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
             recipientId={getOtherParticipantId(
               getLatestMessage(selectedConversation)!
             )} // Passing recipientId
+            isViewingThread={isViewingThread}
+            isMobile={isMobile}
+            setIsViewingThread={setIsViewingThread}
           />
-        ) : (
-          <Text>No conversation selected.</Text>
-        )}
-      </Box>
+        </Box>
+      )}
     </Box>
   );
 };
