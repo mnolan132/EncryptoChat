@@ -44,9 +44,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ handleLogOut }) => {
               justifyContent={"space-between"}
             >
               <Box>
-                <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
-                  Profile
-                </Text>
+                <Link to="/profile" onClick={onClose}>
+                  <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
+                    Profile
+                  </Text>
+                </Link>
                 <Link to="/messages" onClick={onClose}>
                   <Text fontWeight={"medium"} fontSize={"2xl"} py={"10px"}>
                     Messages

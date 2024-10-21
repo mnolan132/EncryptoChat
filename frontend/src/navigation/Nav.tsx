@@ -75,6 +75,8 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
               m={"10px"}
               display={expandMenu ? "flex" : "block"}
             >
+            <Link to="/profile">
+              
               <Icon
                 as={ImProfile}
                 height={"30px"}
@@ -87,6 +89,7 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
               >
                 Profile
               </Text>
+            </Link>
             </Box>
             <Link to="/messages">
               <Box

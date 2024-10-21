@@ -6,6 +6,8 @@ import "./App.css";
 import Nav from "./navigation/Nav";
 import ContactsPage from "./contact/Contact";
 import Conversations from "./messages/Conversations";
+import ProfilePage from "./profile/Profile";
+
 
 type User = {
   email: string;
@@ -30,7 +32,7 @@ function App() {
 
   return (
     <ChakraProvider>
-      <Box height={"100vh"} backgroundColor={"ffffff"}>
+      <Box height={"100vh"}>
         <Router>
           <Nav
             isLoggedIn={isLoggedIn}
@@ -43,15 +45,11 @@ function App() {
             setUser={setUser}
             user={user}
           />
-          <Box
-            mt={"60px"}
-            pl={{ base: "0px", lg: "73px" }}
-            w={"100vw"}
-            height={`calc(100vh - 60px)`}
-          >
+          <Box mt={"60px"} pl={{ base: "0px", lg: "73px" }} w={"100vw"}>
             <Routes>
               <Route path="/contacts" element={<ContactsPage />} />
               <Route path="/messages" element={<Conversations user={user} />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </Box>
         </Router>
