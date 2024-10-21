@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -78,6 +78,15 @@ const MessageThread: React.FC<MessageProps> = ({
     }
   };
 
+  const messageRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll to the latest message when messages change
+  useEffect(() => {
+    messageRef.current?.lastElementChild?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
+
   // Handle undefined or null messages
   if (!messages || messages.length === 0) {
     return <Text>No messages in this conversation.</Text>;
@@ -100,6 +109,7 @@ const MessageThread: React.FC<MessageProps> = ({
 
           return (
             <Box
+              ref={messageRef}
               key={msg.id}
               display="flex"
               justifyContent={isSentByCurrentUser ? "flex-end" : "flex-start"}
