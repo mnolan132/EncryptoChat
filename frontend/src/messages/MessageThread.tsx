@@ -9,6 +9,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { BsFillSendFill } from "react-icons/bs";
+import { IoReturnDownBack } from "react-icons/io5";
 import { formatTimestamp } from "../utils";
 
 // Define the message structure types
@@ -30,6 +31,9 @@ interface MessageProps {
   currentUserId: string; // Pass the current user to differentiate sent and received messages
   otherParticipantName: string;
   recipientId: string;
+  isViewingThread: boolean;
+  isMobile: boolean | undefined;
+  setIsViewingThread: (value: React.SetStateAction<boolean>) => void;
 }
 
 const MessageThread: React.FC<MessageProps> = ({
@@ -37,6 +41,9 @@ const MessageThread: React.FC<MessageProps> = ({
   currentUserId,
   otherParticipantName,
   recipientId,
+  isViewingThread,
+  isMobile,
+  setIsViewingThread,
 }) => {
   const [messageContent, setMessageContent] = useState("");
   const toast = useToast();
@@ -71,7 +78,6 @@ const MessageThread: React.FC<MessageProps> = ({
         duration: 1000,
         isClosable: true,
       });
-      console.log(data);
       setMessageContent("");
     } catch (error) {
       console.error("Error:", error);
@@ -99,17 +105,40 @@ const MessageThread: React.FC<MessageProps> = ({
       flexDir={"column"}
       justifyContent={"space-between"}
     >
-      <Text fontWeight={"medium"} fontSize={"large"} textAlign={"left"}>
-        Conversation with {otherParticipantName}
-      </Text>
+      {/* Conversation Title (Sticky) */}
+      <Box
+        position="sticky"
+        top={0}
+        bg="white"
+        zIndex={1}
+        p={1}
+        borderBottom="1px solid lightgray"
+        display={"flex"}
+        alignItems={"center"}
+      >
+        {isViewingThread && isMobile && (
+          <Button onClick={() => setIsViewingThread(false)} mx={2}>
+            <Icon as={IoReturnDownBack} />
+          </Button>
+        )}
+        <Text fontWeight={"medium"} fontSize={"large"} textAlign={"left"}>
+          Conversation with {otherParticipantName}
+        </Text>
+      </Box>
 
-      <Box p={4} overflowY="scroll" flexGrow={1}>
+      {/* Scrollable Message Container */}
+      <Box
+        flexGrow={1}
+        overflowY="auto"
+        p={4}
+        ref={messageRef}
+        maxHeight="calc(100vh - 200px)" // Adjust max height to ensure space for header and footer
+      >
         {messages.map((msg) => {
           const isSentByCurrentUser = msg.message.senderId === currentUserId;
 
           return (
             <Box
-              ref={messageRef}
               key={msg.id}
               display="flex"
               justifyContent={isSentByCurrentUser ? "flex-end" : "flex-start"}
@@ -131,28 +160,41 @@ const MessageThread: React.FC<MessageProps> = ({
           );
         })}
       </Box>
-      <form onSubmit={sendMessage}>
-        <FormControl>
-          <Box display={"flex"} my="10px">
-            <Input
-              placeholder="Type your message"
-              borderRightRadius={0}
-              borderLeftRadius={"15px"}
-              value={messageContent}
-              onChange={(event) => setMessageContent(event.currentTarget.value)}
-            ></Input>
-            <Button
-              borderLeftRadius={0}
-              borderRightRadius={"15px"}
-              colorScheme="teal"
-              bgColor={"#0CCEC2"}
-              type={"submit"}
-            >
-              <Icon as={BsFillSendFill} />
-            </Button>
-          </Box>
-        </FormControl>
-      </form>
+
+      {/* Message Input (Sticky) */}
+      <Box
+        position="sticky"
+        bottom={0}
+        bg="white"
+        p={4}
+        borderTop="1px solid lightgray"
+        zIndex={1}
+      >
+        <form onSubmit={sendMessage}>
+          <FormControl>
+            <Box display={"flex"}>
+              <Input
+                placeholder="Type your message"
+                borderRightRadius={0}
+                borderLeftRadius={"15px"}
+                value={messageContent}
+                onChange={(event) =>
+                  setMessageContent(event.currentTarget.value)
+                }
+              />
+              <Button
+                borderLeftRadius={0}
+                borderRightRadius={"15px"}
+                colorScheme="teal"
+                bgColor={"#0CCEC2"}
+                type={"submit"}
+              >
+                <Icon as={BsFillSendFill} />
+              </Button>
+            </Box>
+          </FormControl>
+        </form>
+      </Box>
     </Box>
   );
 };
