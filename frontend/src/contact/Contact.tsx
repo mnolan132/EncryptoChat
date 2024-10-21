@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { 
-  Box, Button, Text, useToast, Image, Flex, Modal, 
-  ModalOverlay, ModalBody,ModalFooter, ModalContent,
-  ModalHeader, ModalCloseButton, useDisclosure, Input,
-  useBreakpointValue, VStack, Spinner
+  Box, Button, Text, useToast, Image, Flex, useDisclosure, Input,
+  VStack, Spinner
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AddIcon, DeleteIcon, EmailIcon, SettingsIcon } from "@chakra-ui/icons";
@@ -12,22 +10,20 @@ interface Contact {
   id: string;
   name: string;
   email: string;
+  contactPicture?: string;
 }
 
 const ContactsPage: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const userId = "3493999e-14f8-4e79-904f-b21c73ada225"; //Change this to actual userId based on the logged in.
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-
-  // Mobile layout
-  const isMobile = useBreakpointValue({ base: true, lg: false });
+  const { onClose } = useDisclosure();
 
   // Fetch contacts on component mount
   useEffect(() => {
@@ -118,136 +114,154 @@ const ContactsPage: React.FC = () => {
   };  
 
   // Shows each contact details
-  const handleContactClick = (contact: Contact) => {
-    setSelectedContact(contact);
+  // const handleContactClick = (contact: Contact) => {
+  //   setSelectedContact(contact);
+  // };
+
+  const getInitials = (name: string) => {
+    const [firstName, lastName] = name.split(" ");
+    return `${(firstName?.[0] || "")}${(lastName?.[0] || "")}`.toUpperCase();
   };
+
 
   if (loading) return <Spinner />;
 
   return ( 
-    <VStack bg="white" p={4} w={[300, 400, 500]} height={{base: "100%", md: "50%", xl: "25%"}}>
-      <Box flexShrink={0}>
-        {/* Contact list*/}
-        <Box>
-          <Box textAlign="center" mb={6}>
-            <Button onClick={onOpen} w="100%" leftIcon={<AddIcon />}>
-              Add Contact
-            </Button>
+    <Box display={{ base: "block", lg: "flex" }} height="93vh" m={"10px"}>
+      {/* Left Panel: Contact List */}
+      <Box w={{ base: "100%", lg: "50%" }} display={"flex"} flexDir={"column"}>
+        <Button
+          bg={"#0CCEC2"}
+          my={"10px"}
+          mx={{ base: "10px", sm: "20px", md: "40px" }}
+          onClick={() => {
+            setShowAddForm(true);
+            setSelectedContact(null);
+          }}
+        >
+          <Box display={"flex"} alignItems={"center"}>
+            <AddIcon h={"20px"} w={"20px"} mx={"20px"} />
+            <Text>Add Contact</Text>
           </Box>
-           {/* Add contact modal */}
-           <Modal isOpen={isOpen} onClose={onClose} size="xs" >
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Add Contact</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <Box m="10px">
-                  <Input 
-                  placeholder="Enter Name" 
-                  size="md"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  />
-                </Box>
-                <Box m="10px">
-                  <Input 
-                  placeholder="Enter Email" 
-                  size="md"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  />
-                </Box>
-              </ModalBody>
-              <ModalFooter>
-                <Box m="10px">
-                  <Button colorScheme="blue" mr={3} onClick={handleAddContact}>
-                    Save
-                  </Button>
-                </Box>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-          {contacts.map((contact) => (
-            <Flex
-              key={contact.id}
-              direction="row"
-              align="center"
-              mb={4}
-              maxW="100%"
-              cursor="pointer"
-              onClick={() => handleContactClick(contact)}
-              _hover={{ bg: "gray.100" }}
-            >
-              <Image
-                boxSize="75px"
-                borderRadius="10px"
-                src="https://via.placeholder.com/150"
-                alt="Contact Image"
-                mb={{ base: 4, lg: 0 }}
-              />
-              <Box pl={4}>
-                <Text fontWeight="bold" fontSize="md">{contact.name}</Text>
-                <Text fontSize="sm" color="gray.500">{contact.email}</Text>
-              </Box>
-            </Flex>
-          ))}
-        </Box>
+        </Button>
+        {contacts.map((contact) => (
+          <Flex
+            key={contact.id}
+            p={2}
+            align="center"
+            cursor="pointer"
+            onClick={() => {
+              setSelectedContact(contact);
+              setShowAddForm(false);
+            }}
+            bg={selectedContact?.id === contact.id ? "gray.200" : "transparent"}
+            _hover={{ bg: "gray.100" }}
+          >
+            <Box>
+              {contact?.contactPicture ? (
+                <Image
+                boxSize="50px"
+                borderRadius="full"
+                src={contact.contactPicture}
+                alt="Profile"
+                mr={4}
+              /> 
+              ) : (
+                <Flex
+                  width={100}
+                  height={100}
+                  borderRadius="50%"
+                  bg="gray.300"
+                  align="center"
+                  justify="center"
+                  fontSize="32px"
+                  fontWeight="bold"
+                  color="white"
+                >
+                  {getInitials(contact.name)}                
+                </Flex>
+              )} 
+            </Box>
+            
+            <Box>
+              <Text fontWeight="bold">{contact.name}</Text>
+              <Text fontSize="sm" color="gray.500">
+                {contact.email}
+              </Text>
+            </Box>
+          </Flex>
+        ))}
+      </Box>
 
-        {/* Contact details modal */}
-        {selectedContact && (
-          isMobile ? (
-            <Modal 
-            size="xs" 
-            isOpen={!!selectedContact} onClose={() => setSelectedContact(null)}
-            >
-              <ModalOverlay />
-              <ModalContent>
-                <ModalCloseButton />
-                <ModalBody>
-                  <Flex direction="column" alignItems="center" justifyContent="center">
-                    <Image textAlign="center" boxSize="75px" borderRadius="10px" src="https://via.placeholder.com/150" alt="Contact Image" mb={4} />
-                    <Text>{selectedContact.name}</Text>
-                    <Text>{selectedContact.email}</Text>
-                  </Flex>
-                </ModalBody>
-                <ModalFooter>
-                  <Button bg="none" leftIcon={<EmailIcon />} />
-                  <Button bg="none" mr={3} leftIcon={<DeleteIcon />} onClick={() => handleDeleteContact(selectedContact.id)} />
-                  <Button bg="none" rightIcon={<SettingsIcon />} />
-                  
-                </ModalFooter>
-              </ModalContent>
-            </Modal>
-          ) : (
-            <Box
-              p={4}
-              borderWidth={1}
-              borderRadius="lg"
-              boxShadow="sm"
-              bg="white"
-              maxW="40%"
-              ml={4}
-            >
+      {/* Right Panel: Contact Details or Add Form */}
+      <Box w={{ base: "100%", lg: "50%" }} p={4}>
+        {showAddForm ? (
+          <VStack spacing={4}>
+            <Text fontSize="2xl" fontWeight="bold">
+              Add New Contact
+            </Text>
+            <Input
+              placeholder="Enter Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <Input
+              placeholder="Enter Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Button bg={"#0CCEC2"} onClick={handleAddContact}>
+              Save
+            </Button>
+          </VStack>
+        ) : selectedContact ? (
+          <Box>
+            <VStack>
+            {selectedContact.contactPicture ? (
               <Image
-                boxSize="75px"
-                borderRadius="10px"
-                src="https://via.placeholder.com/150"
-                alt="Contact Image"
+                boxSize={"100px"}
+                borderRadius="full"
+                src={selectedContact.contactPicture}
+                alt="Profile"
                 mb={4}
               />
-              <Text fontWeight="bold" fontSize="xl">{selectedContact.name}</Text>
-              <Text>{selectedContact.email}</Text>
-              <Flex mt={4} justify="space-between">
-                <Button leftIcon={<EmailIcon />} />
-                <Button rightIcon={<DeleteIcon />} onClick={() => handleDeleteContact(selectedContact.id)} />
-                <Button rightIcon={<SettingsIcon />} />
+            ) : (
+              <Flex
+                width="100px"
+                height="100px"
+                borderRadius="full"
+                bg="gray.300"
+                align="center"
+                justify="center"
+                fontSize="40px"
+                fontWeight="bold"
+                color="white"
+                mb={4}
+              >
+                {getInitials(selectedContact.name)}
               </Flex>
-            </Box>
-          )
+            )}
+            <Text fontWeight="bold" fontSize="2xl">
+              {selectedContact.name}
+            </Text>
+            <Text fontSize="lg">{selectedContact.email}</Text>
+            <Flex mt={4} justify="space-between">
+              <Button bg={"none"} leftIcon={<EmailIcon />} />
+              <Button
+                bg={"none"} 
+                rightIcon={<DeleteIcon />}
+                onClick={() => handleDeleteContact(selectedContact.id)}
+              />
+              <Button bg={"none"} rightIcon={<SettingsIcon />} />
+            </Flex>
+            </VStack>
+            
+          </Box>
+        ) : (
+          <Text>No contact selected.</Text>
         )}
       </Box>
-    </VStack>
-   
+      </Box>
   );
 };
 

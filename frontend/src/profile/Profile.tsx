@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { 
-  Box, Button, Image, Text, Flex, Modal, ModalOverlay, 
-  ModalContent, ModalHeader, ModalFooter, ModalBody, 
-  ModalCloseButton, Input, FormLabel, useDisclosure, 
-  useToast, Spinner, FormControl,
-  VStack, IconButton
+  Box, Button, Image, Text, Flex,  
+  Input, FormLabel, useDisclosure, 
+  useToast, Spinner, FormControl, 
+  VStack, IconButton, HStack, Divider
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 
@@ -21,9 +20,9 @@ interface UserProfile {
 const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [file, setFile] = useState<File | null>(null);
+  const [editMode, setEditMode] = useState<boolean>(false);
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { onClose } = useDisclosure();
 
   const userId = "3493999e-14f8-4e79-904f-b21c73ada225";
 
@@ -68,7 +67,7 @@ const ProfilePage: React.FC = () => {
   
     try {
       const response = await axios.put(
-        `http://localhost:5001/users/${userId}`,
+        `http://localhost:5001/profile/user/${userId}`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -101,88 +100,130 @@ const ProfilePage: React.FC = () => {
   if (loading) return <Spinner />;
 
   return (
-      <VStack bg="white" p={4} borderRadius={10} w={[300, 400, 500]} height={{base: "100%", md: "50%", xl: "25%"}}>
-        <Box flexShrink={0}>
-        {profile?.profilePicture ? (
-          <img
-            src={profile.profilePicture}
-            alt="Profile"
-            style={{ width: 100, height: 100, borderRadius: '50%' }}
-          />
-        ) : (
-          <Flex
-            width={100}
-            height={100}
-            borderRadius="50%"
-            bg="gray.300"
-            align="center"
-            justify="center"
-            fontSize="32px"
-            fontWeight="bold"
-            color="white"
-          >
-            {getInitials(profile?.firstName || '', profile?.lastName || '')}
-          </Flex>
-        )}
+    <Flex
+      direction={{ base: "column", md: "row" }}
+      align="stretch"
+      height="93vh"
+      p={4}
+      gap={6}
+    >
+      {/* Left Side: Profile Information */}
+      <Box
+        flex={1}
+        bg="white"
+        p={6}
+        borderRadius="md"
+        boxShadow="lg"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Box>
+          {profile?.profilePicture ? (
+            <Image
+              boxSize="100px"
+              borderRadius="full"
+              src={profile.profilePicture}
+              alt="Profile"
+            />
+          ) : (
+            <Flex
+              width="100px"
+              height="100px"
+              borderRadius="full"
+              bg="gray.300"
+              align="center"
+              justify="center"
+              fontSize="40px"
+              fontWeight="bold"
+              color="white"
+            >
+              {getInitials(profile?.firstName || "", profile?.lastName || "")}
+            </Flex>
+          )}
+        </Box>
+        <Text fontWeight="bold" fontSize="2xl" mt={4}>
+          {profile?.firstName} {profile?.lastName}
+        </Text>
+        <Text fontSize="lg">{profile?.email}</Text>
+        <IconButton
+          mt={4}
+          aria-label="Edit Profile"
+          icon={<EditIcon />}
+          onClick={() => setEditMode(true)}
+        />
       </Box>
 
-        <Text fontWeight="bold" fontSize={{ base: '16px', md: '18px', lg: '22px' }}>{profile?.firstName} {profile?.lastName}</Text>
-        <Text fontSize={{ base: '14px', md: '16px', lg: '20px' }}>Email: {profile?.email}</Text>
-        {profile?.profilePicture && (
-          <img 
-            src={profile.profilePicture} 
-            alt="Profile" 
-            style={{ width: 100, height: 100, borderRadius: '50%' }} 
-          />
-        )}
-        <IconButton aria-label="edit-btn" bg="none" icon={<EditIcon/>} onClick={onOpen} mt={4}/>
+      <Box display={{ base: "block", md: "none" }}>
+        <Divider orientation="horizontal" />
+      </Box>
+      <Box display={{ base: "none", md: "block" }}>
+        <Divider orientation="vertical" />
+      </Box>
 
-        {/* Modal for Profile Update */}
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Update Profile</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <FormControl>
-                <FormLabel>First Name</FormLabel>
-                <Input 
-                  value={profile?.firstName || ''} 
-                  onChange={(e) => setProfile({ ...profile!, firstName: e.target.value })} 
-                />
-              </FormControl>
+      {/* Right Side: Edit Profile Form */}
+      <Box
+        flex={1}
+        bg="white"
+        p={6}
+        borderRadius="md"
+        boxShadow="lg"
+        display={editMode ? "block" : "none"}
+      >
+        <VStack spacing={4}>
+          <Text fontSize="2xl" fontWeight="bold">
+            Edit Profile
+          </Text>
 
-              <FormControl mt={4}>
-                <FormLabel>Last Name</FormLabel>
-                <Input 
-                  value={profile?.lastName || ''} 
-                  onChange={(e) => setProfile({ ...profile!, lastName: e.target.value })} 
-                />
-              </FormControl>
+          <FormControl>
+            <FormLabel>First Name</FormLabel>
+            <Input
+              value={profile?.firstName || ""}
+              onChange={(e) =>
+                setProfile({ ...profile!, firstName: e.target.value })
+              }
+            />
+          </FormControl>
 
-              <FormControl mt={4}>
-                <FormLabel>Email</FormLabel>
-                <Input 
-                  value={profile?.email || ''} 
-                  onChange={(e) => setProfile({ ...profile!, email: e.target.value })} 
-                />
-              </FormControl>
+          <FormControl>
+            <FormLabel>Last Name</FormLabel>
+            <Input
+              value={profile?.lastName || ""}
+              onChange={(e) =>
+                setProfile({ ...profile!, lastName: e.target.value })
+              }
+            />
+          </FormControl>
 
-              <FormControl mt={4}>
-                <FormLabel>Profile Picture</FormLabel>
-                <Input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-              </FormControl>
-            </ModalBody>
+          <FormControl>
+            <FormLabel>Email</FormLabel>
+            <Input
+              value={profile?.email || ""}
+              onChange={(e) =>
+                setProfile({ ...profile!, email: e.target.value })
+              }
+            />
+          </FormControl>
 
-            <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={handleUpdateProfile}>
-                Save
-              </Button>
-              <Button onClick={onClose}>Cancel</Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </VStack>
+          <FormControl>
+            <FormLabel>Change Password</FormLabel>
+            <Input
+              value={profile?.plainPassword || ""}
+              onChange={(e) => setProfile({ ...profile!, plainPassword: e.target.value })
+            }
+            />
+          </FormControl>
+
+          <HStack spacing={4}>
+            <Button bg={"#0CCEC2"} onClick={handleUpdateProfile}>
+              Save
+            </Button>
+            <Button onClick={() => setEditMode(false)}>Cancel</Button>
+          </HStack>
+        </VStack>
+      </Box>
+    </Flex>
   );
 };
 
