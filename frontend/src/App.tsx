@@ -30,7 +30,7 @@ function App() {
 
   return (
     <ChakraProvider>
-      <Box height={"100vh"}>
+      <Box height={"100vh"} backgroundColor={"ffffff"}>
         <Router>
           <Nav
             isLoggedIn={isLoggedIn}
@@ -43,7 +43,12 @@ function App() {
             setUser={setUser}
             user={user}
           />
-          <Box mt={"60px"} pl={{ base: "0px", lg: "73px" }} w={"100vw"}>
+          <Box
+            mt={"60px"}
+            pl={{ base: "0px", lg: "73px" }}
+            w={"100vw"}
+            height={`calc(100vh - 60px)`}
+          >
             <Routes>
               <Route path="/contacts" element={<ContactsPage />} />
               <Route path="/messages" element={<Conversations user={user} />} />
