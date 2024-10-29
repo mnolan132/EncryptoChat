@@ -1,7 +1,6 @@
 export class User {
   contacts: string[];
   secret: number;
-  profilePicture?: string 
 
   constructor(
     public firstName: string,
@@ -9,10 +8,10 @@ export class User {
     public email: string,
     public password: string,
     public id: string,
-    profilePicture?: string
+    public publicKey: string,
+    public privateKey: string
   ) {
     this.contacts = [];
     this.secret = 0;
-    this.profilePicture = profilePicture;
   }
 }

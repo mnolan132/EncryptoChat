@@ -5,7 +5,7 @@ import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import contactRoutes from "./routes/contactRoutes";
 import messageRoutes from "./routes/messageRoutes";
-import profileRoutes from "./routes/profileRoutes"
+import profileRoutes from "./routes/profileRoutes";
 import cors from "cors";
 
 dotenv.config();
