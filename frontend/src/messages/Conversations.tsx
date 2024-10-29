@@ -1,8 +1,17 @@
-import { Box, Button, Icon, Text, useBreakpointValue } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Icon,
+  Text,
+  useBreakpointValue,
+  useDisclosure,
+} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { BiMessageEdit } from "react-icons/bi";
 import MessageThread from "./MessageThread";
+import NewMessage from "./NewMessage";
 import { formatTimestamp } from "../utils";
+import axios from "axios";
 
 // Define the message structure types
 type Message = {
@@ -33,7 +42,16 @@ interface MessagesProps {
   user: null | User;
 }
 
+interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  contactPicture?: string;
+}
+
 const Conversations: React.FC<MessagesProps> = ({ user }) => {
+  const [contacts, setContacts] = useState<Contact[]>([]);
+
   const [messagesData, setMessagesData] = useState<MessagesResponse | null>(
     null
   );
@@ -45,7 +63,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
   >(null);
   const [isViewingThread, setIsViewingThread] = useState(false); // New state to track mobile view
 
-  // Check if we are on mobile
+  // Check if user is on mobile
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
   // Function to fetch messages from the database
@@ -66,6 +84,17 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
     }
   };
 
+  const fetchContacts = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5001/contacts/getContacts/${user?.id}`
+      );
+      setContacts(response.data.contacts);
+    } catch (error) {
+      console.error("Error fetching contacts", error);
+    }
+  };
+
   // Function to check if new messages have been received
   const checkForNewMessages = async () => {
     const newMessagesData = await fetchMessages();
@@ -76,7 +105,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
       ) {
         setMessagesData(newMessagesData);
         await fetchUserNames(newMessagesData);
-        setDefaultConversation(newMessagesData);
+        // setDefaultConversation(newMessagesData);
       }
     }
   };
@@ -126,6 +155,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
   useEffect(() => {
     if (user && user.id) {
       checkForNewMessages();
+      fetchContacts();
       const intervalId = setInterval(() => checkForNewMessages(), 3000);
       return () => clearInterval(intervalId);
     }
@@ -161,6 +191,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
       ? conversation.message.senderId
       : conversation.message.recipientId;
   };
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Box
@@ -178,12 +209,18 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
             bg={"#0CCEC2"}
             my={"10px"}
             mx={{ base: "10px", sm: "20px", md: "40px" }}
+            onClick={onOpen}
           >
             <Box display={"flex"} alignItems={"center"}>
               <Icon as={BiMessageEdit} h={"30px"} w={"30px"} mx={"10px"} />
               <Text>New Message</Text>
             </Box>
           </Button>
+          <NewMessage
+            isOpen={isOpen}
+            onClose={onClose}
+            contacts={contacts || []}
+          />
           <Text
             textAlign={"left"}
             fontWeight={"medium"}

@@ -3,6 +3,7 @@ import { db } from "../index";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { User } from "../../User";
+import crypto from "crypto";
 
 export const createUser = async (req: Request, res: Response) => {
   const { firstName, lastName, email, plainPassword } = req.body;
@@ -13,9 +14,25 @@ export const createUser = async (req: Request, res: Response) => {
 
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
-
   const userId = uuidv4();
-  const newUser = new User(firstName, lastName, email, hashedPassword, userId);
+
+  // Generate RSA key pair for encryption
+  const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: "spki", format: "pem" },
+    privateKeyEncoding: { type: "pkcs8", format: "pem" },
+  });
+
+  // Create a new User instance with the encryption keys
+  const newUser = new User(
+    firstName,
+    lastName,
+    email,
+    hashedPassword,
+    userId,
+    publicKey, // Store the public key
+    privateKey // Store the private key
+  );
 
   try {
     const userRef = db.ref(`users/${userId}`);
@@ -41,7 +58,13 @@ export const getUser = async (req: Request, res: Response) => {
         const { email, firstName, lastName, id, contacts } = userData;
 
         // Send only the selected fields
-        res.status(200).json({ email, firstName, lastName, id, contacts });
+        res.status(200).json({
+          email,
+          firstName,
+          lastName,
+          id,
+          contacts,
+        });
       } else {
         res.status(404).json({ message: "User not found" });
       }
@@ -51,4 +74,3 @@ export const getUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to retrieve user data" });
   }
 };
-
