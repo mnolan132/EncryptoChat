@@ -9,27 +9,37 @@ import {
 import { EditIcon } from "@chakra-ui/icons";
 
 
-interface UserProfile {
-  firstName: string;
-  lastName: string;
+type User = {
   email: string;
+  firstName: string;
+  id: string;
+  lastName: string;
+};
+
+type UserData = {
   plainPassword: string;
   profilePicture?: string;
 }
 
-const ProfilePage: React.FC = () => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+interface UserProfileProps {
+  user: null | User;
+}
+
+const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
+  const [profile, setProfile] = useState<User | null>(null);
+  const [profilePicture, setProfilePicture] = useState<UserData | null>(null);
+  const [plainPassword, setPlainPassword] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [editMode, setEditMode] = useState<boolean>(false);
   const toast = useToast();
   const { onClose } = useDisclosure();
 
-  const userId = "3493999e-14f8-4e79-904f-b21c73ada225";
+  //const userId = "3493999e-14f8-4e79-904f-b21c73ada225";
 
   const fetchUserProfile = async () => {
     try {
-      console.log(`Fetching data for user: ${userId}`);
-      const response = await axios.get(`http://localhost:5001/user/${userId}`);
+      console.log(`Fetching data for user: ${user?.id}`);
+      const response = await axios.get(`http://localhost:5001/user/${user?.id}`);
 
       console.log('Response received:', response); // Debugging log
       if (response.status === 200) {
@@ -52,7 +62,7 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     fetchUserProfile();
-  }, [userId]);
+  }, [user]);
 
 
 
@@ -62,12 +72,12 @@ const ProfilePage: React.FC = () => {
       firstName: profile?.firstName || '',
       lastName: profile?.lastName || '',
       email: profile?.email || '',
-      plainPassword: profile?.plainPassword || '',
+      plainPassword: plainPassword?.plainPassword || '',
     };
   
     try {
       const response = await axios.put(
-        `http://localhost:5001/profile/user/${userId}`,
+        `http://localhost:5001/profile/user/${user?.id}`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -120,11 +130,11 @@ const ProfilePage: React.FC = () => {
         justifyContent="center"
       >
         <Box>
-          {profile?.profilePicture ? (
+          {profilePicture?.profilePicture ? (
             <Image
               boxSize="100px"
               borderRadius="full"
-              src={profile.profilePicture}
+              src={profilePicture.profilePicture}
               alt="Profile"
             />
           ) : (
@@ -209,8 +219,8 @@ const ProfilePage: React.FC = () => {
           <FormControl>
             <FormLabel>Change Password</FormLabel>
             <Input
-              value={profile?.plainPassword || ""}
-              onChange={(e) => setProfile({ ...profile!, plainPassword: e.target.value })
+              value={plainPassword?.plainPassword || ""}
+              onChange={(e) => setPlainPassword({ ...plainPassword!, plainPassword: e.target.value })
             }
             />
           </FormControl>
