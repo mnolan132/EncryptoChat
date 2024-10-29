@@ -2,11 +2,12 @@ import { Request, Response } from "express";
 import { db } from "../index";
 import { User } from "../../User";
 
+
 export const addContact = async (req: Request, res: Response) => {
   const { userId } = req.params;
-  const { name, email } = req.body;
+  const { firstName, lastName, email } = req.body;
 
-  if (!name || !email) {
+  if (!firstName || !lastName || !email) {
     return res.status(400).json({ message: "All contact fields are required" });
   }
 
@@ -23,6 +24,7 @@ export const addContact = async (req: Request, res: Response) => {
     // Check if the contact's email exists in the users database
     const usersRef = db.ref("users");
     const snapshot = await usersRef.once("value");
+
     let contactExists = false;
     let contactUserId: string | null = null;
 
@@ -30,7 +32,7 @@ export const addContact = async (req: Request, res: Response) => {
       const userData = childSnapshot.val() as User;
       if (userData.email === email) {
         contactExists = true;
-        contactUserId = childSnapshot.key; // get the userId of the contact
+        contactUserId = childSnapshot.key; // Get the userId of the contact
       }
     });
 
@@ -38,35 +40,53 @@ export const addContact = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Contact user not found" });
     }
 
-    // Get the current user's contacts
-    const userRef = db.ref(`users/${userId}`);
-    const userSnapshot = await userRef.once("value");
-    const userData = userSnapshot.val() as User;
+    // Fetch both users' data
+    const [userSnapshot, contactSnapshot] = await Promise.all([
+      db.ref(`users/${userId}`).once("value"),
+      db.ref(`users/${contactUserId}`).once("value"),
+    ]);
 
-    if (!userData) {
-      return res.status(404).json({ message: "User not found" });
+    const userData = userSnapshot.val() as User;
+    const contactData = contactSnapshot.val() as User;
+
+    if (!userData || !contactData) {
+      return res.status(404).json({ message: "User or contact not found" });
     }
 
-    // Check if the contact is already in the user's contact list
-    const contacts = userData.contacts || [];
-    if (contacts.includes(contactUserId)) {
+    const userContacts = userData.contacts || [];
+    const contactContacts = contactData.contacts || [];
+
+    // Check if the contact is already in either user's contact list
+    if (userContacts.includes(contactUserId)) {
       return res
         .status(400)
         .json({ message: "Contact is already in your contacts list" });
     }
 
-    // Add update contact to user's data
-    contacts.push(contactUserId);
-    await userRef.update({ contacts });
+    // Add contact to both users' contact lists
+    userContacts.push(contactUserId);
+    contactContacts.push(userId);
 
-    res
-      .status(201)
-      .json({ message: "Contact added successfully", name, contactUserId });
+    await Promise.all([
+      db.ref(`users/${userId}`).update({ contacts: userContacts }),
+      db.ref(`users/${contactUserId}`).update({ contacts: contactContacts }),
+    ]);
+
+    res.status(201).json({
+      message: "Contact added successfully for both users",
+      firstName,
+      contactUserId,
+    });
   } catch (error) {
     console.error("Error adding contact:", error);
     res.status(500).json({ message: "Failed to add contact" });
   }
 };
+
+
+
+
+
 
 export const getContacts = async (req: Request, res: Response) => {
   const { userId } = req.params;
@@ -97,7 +117,8 @@ export const getContacts = async (req: Request, res: Response) => {
         const contactData = contactSnapshot.val();
         return {
           id: contactId,
-          name: `${contactData.firstName} ${contactData.lastName}`,
+          firstName: contactData.firstName,
+          lastName: contactData.lastName,
           email: contactData.email,
         };
       })
