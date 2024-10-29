@@ -47,9 +47,9 @@ function App() {
           />
           <Box mt={"60px"} pl={{ base: "0px", lg: "73px" }} w={"100vw"}>
             <Routes>
-              <Route path="/contacts" element={<ContactsPage />} />
+              <Route path="/contacts" element={<ContactsPage user={user} />} />
               <Route path="/messages" element={<Conversations user={user} />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile" element={<ProfilePage user={user} />} />
             </Routes>
           </Box>
         </Router>
