@@ -29,10 +29,6 @@ export const newMessage = async (req: Request, res: Response) => {
     const recipientPublicKeySnapshot = await recipientRef.once("value");
     const recipientPublicKey = recipientPublicKeySnapshot.val();
 
-    // Log recipient ID and public key
-    console.log(`Recipient ID: ${recipientId}`);
-    console.log(`Recipient Public Key: ${recipientPublicKey}`);
-
     if (!recipientPublicKey) {
       return res
         .status(404)
@@ -79,10 +75,7 @@ export const getMessages = async (req: Request, res: Response) => {
   const { userId } = req.params;
 
   try {
-    console.log("Starting to retrieve messages for user:", userId);
-
     if (!userId) {
-      console.warn("User ID is missing.");
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -90,7 +83,6 @@ export const getMessages = async (req: Request, res: Response) => {
     const snapshot = await conversationsRef.once("value");
 
     if (!snapshot.exists()) {
-      console.warn("No conversations found in the database.");
       return res.status(404).json({ message: "No conversations found" });
     }
 
@@ -106,8 +98,6 @@ export const getMessages = async (req: Request, res: Response) => {
         );
       }
     );
-
-    console.log("Filtered conversations for user:", userConversations);
 
     const userMessages: Array<{
       id: string;
@@ -125,8 +115,6 @@ export const getMessages = async (req: Request, res: Response) => {
 
         // Check if the user is part of the conversation (sender or recipient)
         if (message.senderId === userId || message.recipientId === userId) {
-          console.log(`Found message for user ${userId}:`, message);
-
           const recipientRef = db.ref(
             `users/${message.recipientId}/privateKey`
           );
@@ -181,10 +169,8 @@ export const getMessages = async (req: Request, res: Response) => {
         .json({ message: "No messages found for this user" });
     }
 
-    console.log("Successfully retrieved messages:", userMessages);
     res.status(200).json({ messages: userMessages });
   } catch (error) {
-    console.error("Error retrieving messages:", error);
     res.status(500).json({ message: "Failed to retrieve messages" });
   }
 };

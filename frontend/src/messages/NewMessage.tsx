@@ -14,42 +14,71 @@ import {
   FormControl,
   Icon,
   Input,
+  useToast,
 } from "@chakra-ui/react";
 import { BsFillSendFill } from "react-icons/bs";
 
 interface Contact {
   id: string;
-  name: string;
+  firstName: string;
   email: string;
-  contactPicture?: string;
+  lastName: string;
 }
 
 interface NewMessageProps {
   isOpen: boolean;
   onClose: () => void;
   contacts: Contact[] | null; // Allow contacts to be null or an array
+  currentUserId: string;
 }
 
 const MessageModal: React.FC<NewMessageProps> = ({
   isOpen,
   onClose,
   contacts = [], // Default to an empty array if contacts is null or undefined
+  currentUserId,
 }) => {
   const [selectedContactId, setSelectedContactId] = useState<string>("");
+  const [messageContent, setMessageContent] = useState("");
+  const toast = useToast();
 
   const handleContactSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedContactId(event.target.value);
   };
 
-  const handleSendMessage = () => {
-    const selectedContact = contacts?.find(
-      (contact) => contact.id === selectedContactId
-    );
-    if (selectedContact) {
-      console.log(`Sending message to: ${selectedContact.name}`);
-      onClose();
-    } else {
-      alert("Please select a contact to send a message.");
+  const sendMessage = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(
+        "http://localhost:5001/message/new-message",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            senderId: currentUserId,
+            recipientId: selectedContactId,
+            messageContent,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      toast({
+        title: "Message sent",
+        status: "success",
+        duration: 1000,
+        isClosable: true,
+      });
+      setMessageContent("");
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
@@ -71,7 +100,7 @@ const MessageModal: React.FC<NewMessageProps> = ({
             {Array.isArray(contacts) &&
               contacts.map((contact) => (
                 <option key={contact.id} value={contact.id}>
-                  {contact.name}
+                  {contact.firstName} {contact.lastName}
                 </option>
               ))}
           </Select>
@@ -80,29 +109,35 @@ const MessageModal: React.FC<NewMessageProps> = ({
               Selected Contact:{" "}
               {
                 contacts?.find((contact) => contact.id === selectedContactId)
-                  ?.name
+                  ?.firstName
               }
             </Text>
           )}
-          <FormControl>
-            <Box display={"flex"}>
-              <Input
-                placeholder="Type your message"
-                borderRightRadius={0}
-                borderLeftRadius={"15px"}
-                isDisabled={selectedContactId === ""}
-              />
-              <Button
-                borderLeftRadius={0}
-                borderRightRadius={"15px"}
-                colorScheme="teal"
-                bgColor={"#0CCEC2"}
-                type={"submit"}
-              >
-                <Icon as={BsFillSendFill} />
-              </Button>
-            </Box>
-          </FormControl>
+          <form onSubmit={sendMessage}>
+            <FormControl>
+              <Box display={"flex"}>
+                <Input
+                  placeholder="Type your message"
+                  borderRightRadius={0}
+                  borderLeftRadius={"15px"}
+                  isDisabled={selectedContactId === ""}
+                  value={messageContent}
+                  onChange={(event) =>
+                    setMessageContent(event.currentTarget.value)
+                  }
+                />
+                <Button
+                  borderLeftRadius={0}
+                  borderRightRadius={"15px"}
+                  colorScheme="teal"
+                  bgColor={"#0CCEC2"}
+                  type={"submit"}
+                >
+                  <Icon as={BsFillSendFill} />
+                </Button>
+              </Box>
+            </FormControl>
+          </form>
         </ModalBody>
       </ModalContent>
     </Modal>

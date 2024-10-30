@@ -30,8 +30,8 @@ export const createUser = async (req: Request, res: Response) => {
     email,
     hashedPassword,
     userId,
-    publicKey, // Store the public key
-    privateKey // Store the private key
+    publicKey,
+    privateKey
   );
 
   try {
@@ -54,10 +54,8 @@ export const getUser = async (req: Request, res: Response) => {
       if (snapshot.exists()) {
         const userData = snapshot.val();
 
-        // Destructure the fields you want to include
         const { email, firstName, lastName, id, contacts } = userData;
 
-        // Send only the selected fields
         res.status(200).json({
           email,
           firstName,

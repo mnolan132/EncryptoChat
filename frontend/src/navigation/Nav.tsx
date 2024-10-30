@@ -70,27 +70,26 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
           justifyContent={"space-between"}
         >
           <Box mt={"60px"}>
-            <Box
-              height={expandMenu ? "50px" : "65px"}
-              m={"10px"}
-              display={expandMenu ? "flex" : "block"}
-            >
             <Link to="/profile">
-              
-              <Icon
-                as={ImProfile}
-                height={"30px"}
-                width={"30px"}
-                mx={expandMenu ? "12px" : 0}
-              />
-              <Text
-                fontSize={expandMenu ? "medium" : "xs"}
-                mx={expandMenu ? "10px" : 0}
+              <Box
+                height={expandMenu ? "50px" : "65px"}
+                m={"10px"}
+                display={expandMenu ? "flex" : "block"}
               >
-                Profile
-              </Text>
+                <Icon
+                  as={ImProfile}
+                  height={"30px"}
+                  width={"30px"}
+                  mx={expandMenu ? "12px" : 0}
+                />
+                <Text
+                  fontSize={expandMenu ? "medium" : "xs"}
+                  mx={expandMenu ? "10px" : 0}
+                >
+                  Profile
+                </Text>
+              </Box>
             </Link>
-            </Box>
             <Link to="/messages">
               <Box
                 height={expandMenu ? "50px" : "65px"}
