@@ -5,7 +5,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AddIcon, DeleteIcon, EmailIcon, SettingsIcon, CloseIcon} from "@chakra-ui/icons";
-
+import { IoReturnDownBack } from "react-icons/io5";
 
 type User = {
   email: string;
@@ -171,6 +171,12 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
       height={"100%"}
       overflowY={"auto"}
     >
+       {isViewingContact && isMobile && (
+          <Button onClick={() => setIsViewingContact(false)} mx={2}>
+            <Icon as={IoReturnDownBack} />
+          </Button>
+        )}
+
     {(!isViewingContact || !isMobile) && (
       <Box
         w={{ base: "100%", lg: "50%" }}
@@ -262,7 +268,7 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
               <Flex
                 width={100}
                 height={100}
-                borderRadius="50%"
+                borderRadius="full"
                 bg="gray.300"
                 align="center"
                 justify="center"
@@ -289,6 +295,7 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
       </Box>
     )}
     {selectedContact && (!isMobile || isViewingContact) && (
+      
       <VStack w={{ base: "100%", lg: "50%" }} px={4} mt={10}>
         {selectedContact.contactPicture ? (
           <Image
