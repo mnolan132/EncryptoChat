@@ -1,10 +1,13 @@
-import { Box, Icon, Text, Button } from "@chakra-ui/react";
+import { Box, Icon, Text, Button, useDisclosure } from "@chakra-ui/react";
 import MobileMenu from "./MobileMenu";
 import { ImProfile } from "react-icons/im";
 import { HamburgerIcon, ChatIcon } from "@chakra-ui/icons";
 import { RiContactsFill } from "react-icons/ri";
+import { BiMessageEdit } from "react-icons/bi";
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import NewMessage from "../messages/NewMessage";
 
 type User = {
   email: string;
@@ -13,14 +16,30 @@ type User = {
   lastName: string;
 };
 
+interface Contact {
+  id: string;
+  firstName: string;
+  email: string;
+  lastName: string;
+}
+
 interface NavProps {
   isLoggedIn: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
   setUser: (value: React.SetStateAction<User | null>) => void;
+  contacts: Contact[] | null; // Allow contacts to be null or an array
+  user: User | null;
 }
 
-const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
+const Nav: React.FC<NavProps> = ({
+  isLoggedIn,
+  setIsLoggedIn,
+  setUser,
+  contacts,
+  user,
+}) => {
   const [expandMenu, setExpandMenu] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const toggleMenu = () => {
     setExpandMenu(!expandMenu);
@@ -43,7 +62,11 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
         justifyContent={"flex-start"}
         alignItems={"center"}
       >
-        <MobileMenu handleLogOut={handleLogout} />
+        <MobileMenu
+          handleLogOut={handleLogout}
+          contacts={contacts}
+          user={user}
+        />
       </Box>
       <Box
         height={"100vh"}
@@ -69,28 +92,55 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
           flexDir={"column"}
           justifyContent={"space-between"}
         >
-          <Box mt={"60px"}>
-            <Box
-              height={expandMenu ? "50px" : "65px"}
-              m={"10px"}
+          <Box mt={"60px"} display={"flex"} flexDir={"column"}>
+            <Button
+              bg={"#0CCEC2"}
+              height={"50px"}
+              my={"10px"}
               display={expandMenu ? "flex" : "block"}
+              onClick={onOpen}
+              mx={"3px"}
             >
-            <Link to="/profile">
-              
               <Icon
-                as={ImProfile}
+                as={BiMessageEdit}
                 height={"30px"}
                 width={"30px"}
                 mx={expandMenu ? "12px" : 0}
               />
               <Text
+                display={expandMenu ? "block" : "none"}
                 fontSize={expandMenu ? "medium" : "xs"}
                 mx={expandMenu ? "10px" : 0}
               >
-                Profile
+                New Message
               </Text>
+            </Button>
+            <NewMessage
+              isOpen={isOpen}
+              onClose={onClose}
+              contacts={contacts}
+              currentUserId={user?.id}
+            />
+            <Link to="/profile">
+              <Box
+                height={expandMenu ? "50px" : "65px"}
+                m={"10px"}
+                display={expandMenu ? "flex" : "block"}
+              >
+                <Icon
+                  as={ImProfile}
+                  height={"30px"}
+                  width={"30px"}
+                  mx={expandMenu ? "12px" : 0}
+                />
+                <Text
+                  fontSize={expandMenu ? "medium" : "xs"}
+                  mx={expandMenu ? "10px" : 0}
+                >
+                  Profile
+                </Text>
+              </Box>
             </Link>
-            </Box>
             <Link to="/messages">
               <Box
                 height={expandMenu ? "50px" : "65px"}
@@ -130,6 +180,7 @@ const Nav: React.FC<NavProps> = ({ isLoggedIn, setIsLoggedIn, setUser }) => {
           <Button
             display={expandMenu ? "block" : "none"}
             onClick={handleLogout}
+            mx={"5px"}
           >
             Log Out
           </Button>
