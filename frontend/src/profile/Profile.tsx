@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { 
-  Box, Button, Image, Text, Flex,  
-  Input, FormLabel, useDisclosure, 
-  useToast, Spinner, FormControl, 
-  VStack, IconButton, HStack, Divider
+  Box, 
+  Button, 
+  Image, 
+  Text, 
+  Flex,  
+  Input, 
+  FormLabel, 
+  useDisclosure, 
+  useToast, 
+  FormControl, 
+  VStack, 
+  IconButton, 
+  HStack, 
+  Divider
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
+import UserThumbnail from "../utiltyComponent/UserThumbnail";
 
 
 type User = {
@@ -102,18 +113,14 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
       });
     }
   };
-  
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase();
-  };
 
-  if (loading) return <Spinner />;
+  if (loading) return <div>Loading profile...</div>;
 
   return (
     <Flex
       direction={{ base: "column", md: "row" }}
       align="stretch"
-      height="93vh"
+      height="100%"
       p={4}
       gap={6}
     >
@@ -138,19 +145,22 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
               alt="Profile"
             />
           ) : (
-            <Flex
-              width="100px"
-              height="100px"
-              borderRadius="full"
-              bg="gray.300"
-              align="center"
-              justify="center"
-              fontSize="40px"
-              fontWeight="bold"
-              color="white"
-            >
-              {getInitials(profile?.firstName || "", profile?.lastName || "")}
-            </Flex>
+            <Box display={"flex"} flexDir={"row"} alignItems={"center"}>
+              <UserThumbnail
+                firstName={
+                  profile?.firstName.split(
+                    " "
+                  )[0] || "Unknown"
+                }
+                lastName={
+                  profile?.lastName.split(
+                    " "
+                  )[0] || ""
+                }
+                diameter="100px"
+                fontSize="40px"
+              />
+            </Box>
           )}
         </Box>
         <Text fontWeight="bold" fontSize="2xl" mt={4}>
@@ -161,25 +171,18 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
           mt={4}
           aria-label="Edit Profile"
           icon={<EditIcon />}
-          onClick={() => setEditMode(true)}
+          onClick={() => setEditMode((prev) => !prev)}
         />
       </Box>
 
-      <Box display={{ base: "block", md: "none" }}>
-        <Divider orientation="horizontal" />
-      </Box>
-      <Box display={{ base: "none", md: "block" }}>
-        <Divider orientation="vertical" />
-      </Box>
-
-      {/* Right Side: Edit Profile Form */}
+      {/* Right Side for bigger screen: Edit Profile Form */}
       <Box
         flex={1}
         bg="white"
         p={6}
         borderRadius="md"
         boxShadow="lg"
-        display={editMode ? "block" : "none"}
+        display={{base: editMode ? "block" : "none", md: "block"}}
       >
         <VStack spacing={4}>
           <Text fontSize="2xl" fontWeight="bold">
@@ -224,7 +227,6 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
             }
             />
           </FormControl>
-
           <HStack spacing={4}>
             <Button bg={"#0CCEC2"} onClick={handleUpdateProfile}>
               Save
