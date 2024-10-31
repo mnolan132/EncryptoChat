@@ -12,6 +12,7 @@ import MessageThread from "./MessageThread";
 import NewMessage from "./NewMessage";
 import { formatTimestamp } from "../utils";
 import axios from "axios";
+import UserThumbnail from "../utiltyComponent/UserThumbnail";
 
 // Define the message structure types
 type Message = {
@@ -44,9 +45,9 @@ interface MessagesProps {
 
 interface Contact {
   id: string;
-  name: string;
+  firstName: string;
   email: string;
-  contactPicture?: string;
+  lastName: string;
 }
 
 const Conversations: React.FC<MessagesProps> = ({ user }) => {
@@ -156,6 +157,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
     if (user && user.id) {
       checkForNewMessages();
       fetchContacts();
+      console.log("contacts: ", contacts);
       const intervalId = setInterval(() => checkForNewMessages(), 3000);
       return () => clearInterval(intervalId);
     }
@@ -220,6 +222,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
             isOpen={isOpen}
             onClose={onClose}
             contacts={contacts || []}
+            currentUserId={user?.id || ""}
           />
           <Text
             textAlign={"left"}
@@ -260,20 +263,38 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
                         : "transparent"
                     }
                   >
-                    <Box display={"flex"} alignItems={"center"}>
-                      <Text fontWeight={"bold"} fontSize={"large"}>
-                        {otherParticipantId
-                          ? conversationNames[otherParticipantId] ||
-                            otherParticipantId
-                          : "Unknown"}
-                      </Text>
-                      <Text fontSize={"sm"} ml={"50px"}>
-                        {formatTimestamp(conversation.message.timestamp)}
-                      </Text>
+                    <Box display={"flex"} flexDir={"row"} alignItems={"center"}>
+                      <UserThumbnail
+                        firstName={
+                          conversationNames[otherParticipantId]?.split(
+                            " "
+                          )[0] || "Unknown"
+                        }
+                        lastName={
+                          conversationNames[otherParticipantId]?.split(
+                            " "
+                          )[1] || ""
+                        }
+                        diameter="40px"
+                        fontSize="20px"
+                      />
+                      <Box ml={"15px"}>
+                        <Box display={"flex"} alignItems={"center"}>
+                          <Text fontWeight={"bold"} fontSize={"large"}>
+                            {otherParticipantId
+                              ? conversationNames[otherParticipantId] ||
+                                otherParticipantId
+                              : "Unknown"}
+                          </Text>
+                          <Text fontSize={"sm"} ml={"50px"}>
+                            {formatTimestamp(conversation.message.timestamp)}
+                          </Text>
+                        </Box>
+                        <Text>
+                          {senderName}: {conversation.message.messageContent}
+                        </Text>
+                      </Box>
                     </Box>
-                    <Text>
-                      {senderName}: {conversation.message.messageContent}
-                    </Text>
                   </Box>
                 );
               })}

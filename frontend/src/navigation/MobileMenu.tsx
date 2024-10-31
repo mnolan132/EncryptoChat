@@ -13,8 +13,24 @@ import {
 import { HamburgerIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 
+interface Contact {
+  id: string;
+  firstName: string;
+  email: string;
+  lastName: string;
+}
+
+type User = {
+  email: string;
+  firstName: string;
+  id: string;
+  lastName: string;
+};
+
 interface MobileMenuProps {
   handleLogOut: () => void;
+  contacts: Contact[] | null; // Allow contacts to be null or an array
+  user: User | null;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ handleLogOut }) => {
