@@ -29,7 +29,7 @@ interface NewMessageProps {
   isOpen: boolean;
   onClose: () => void;
   contacts: Contact[] | null; // Allow contacts to be null or an array
-  currentUserId: string;
+  currentUserId: string | undefined;
 }
 
 const MessageModal: React.FC<NewMessageProps> = ({
