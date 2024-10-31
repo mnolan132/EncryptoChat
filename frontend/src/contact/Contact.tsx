@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/icons";
 import NewMessage from "../messages/NewMessage";
 
+
 type User = {
   email: string;
   firstName: string;
