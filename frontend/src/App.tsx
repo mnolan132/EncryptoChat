@@ -16,6 +16,7 @@ type User = {
 };
 
 function App() {
+  const [darkMode, setDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<null | User>(null);
   const [contacts, setContacts] = useState<User[]>([]);
@@ -49,10 +50,25 @@ function App() {
     }
   };
 
+  const checkDarkMode = () => {
+    if (
+      window &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      setDarkMode(true);
+    }
+  };
+
+  // This function toggles darkmode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn");
     const storedUser = localStorage.getItem("user");
-
+    checkDarkMode();
     if (loggedIn && storedUser) {
       setIsLoggedIn(true);
       setUser(JSON.parse(storedUser)); // Restore the user state
@@ -60,9 +76,13 @@ function App() {
     }
   }, []);
 
+  // Global styles
+  const bgColor = darkMode ? "#404258" : "#FBFAF5";
+  const textColor = darkMode ? "whitesmoke" : "#404258";
+
   return (
     <ChakraProvider>
-      <Box height={"100vh"}>
+      <Box height={"100vh"} backgroundColor={bgColor} textColor={textColor}>
         <Router>
           <Nav
             isLoggedIn={isLoggedIn}
@@ -70,6 +90,8 @@ function App() {
             setUser={setUser}
             contacts={contacts}
             user={user}
+            toggleDarkMode={toggleDarkMode}
+            darkMode={darkMode}
           />
           <Validate
             isLoggedIn={isLoggedIn}
@@ -80,8 +102,14 @@ function App() {
           <Box mt={"60px"} pl={{ base: "0px", lg: "73px" }} w={"100vw"}>
             <Routes>
               <Route path="/contacts" element={<ContactsPage user={user} />} />
-              <Route path="/messages" element={<Conversations user={user} />} />
-              <Route path="/profile" element={<ProfilePage user={user} />} />
+              <Route
+                path="/messages"
+                element={<Conversations user={user} darkMode={darkMode} />}
+              />
+              <Route
+                path="/profile"
+                element={<ProfilePage user={user} darkMode={darkMode} />}
+              />
             </Routes>
           </Box>
         </Router>

@@ -98,19 +98,17 @@ const Login: React.FC<LoginProps> = ({
       <Box display={selectSignup || viewTwoFA ? "none" : "block"}>
         <Box>
           <form onSubmit={logIn}>
-            <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+            <Box boxShadow="lg" rounded="lg" m={"25px"}>
               <FormControl isRequired>
                 <Input
                   type="text"
                   placeholder="Email Address"
                   value={email}
                   onChange={(event) => setEmail(event.currentTarget.value)}
-                  border={"none"}
-                  shadow={3}
                 />
               </FormControl>
             </Box>
-            <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+            <Box boxShadow="lg" rounded="lg" m={"25px"}>
               <Stack spacing={4} w="300px" my="10px">
                 <InputGroup>
                   <FormControl isRequired>

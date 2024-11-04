@@ -112,7 +112,7 @@ const Signup: React.FC<SignupProps> = ({
   return (
     <Box display={!selectSignup ? "none" : "block"}>
       <form onSubmit={createUser}>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="lg" rounded="lg" m={"25px"}>
           <FormControl isRequired>
             <Input
               type="text"
@@ -126,7 +126,7 @@ const Signup: React.FC<SignupProps> = ({
             />
           </FormControl>
         </Box>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="lg" rounded="lg" m={"25px"}>
           <FormControl isRequired>
             <Input
               type="text"
@@ -140,7 +140,7 @@ const Signup: React.FC<SignupProps> = ({
             />
           </FormControl>
         </Box>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="lg" rounded="lg" m={"25px"}>
           <FormControl isRequired>
             <Input
               type="text"
@@ -152,7 +152,7 @@ const Signup: React.FC<SignupProps> = ({
             />
           </FormControl>
         </Box>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="" rounded="lg" m={"25px"}>
           <Stack spacing={4} w="300px" my="10px">
             <InputGroup>
               <FormControl isRequired>
@@ -176,7 +176,7 @@ const Signup: React.FC<SignupProps> = ({
             </InputGroup>
           </Stack>
         </Box>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="lg" rounded="lg" m={"25px"}>
           <Stack spacing={4} w="300px" my="10px">
             <InputGroup>
               <FormControl isRequired>
