@@ -13,8 +13,7 @@ import {
   FormControl,
   VStack,
   IconButton,
-  HStack,
-  Divider,
+  HStack
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import UserThumbnail from "../utiltyComponent/UserThumbnail";
@@ -162,6 +161,7 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user, darkMode }) => {
         <IconButton
           mt={4}
           aria-label="Edit Profile"
+          display={{ base: "block", md: "none" }}
           icon={<EditIcon />}
           onClick={() => setEditMode((prev) => !prev)}
         />
