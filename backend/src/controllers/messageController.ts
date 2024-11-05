@@ -175,6 +175,32 @@ export const getMessages = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteConversation = async (req: Request, res: Response) => {
+  const { conversationId } = req.params;
+
+  if (!conversationId) {
+    return res.status(400).json({ message: "Conversation ID is required" });
+  }
+
+  try {
+    const conversationRef = db.ref(`conversations/${conversationId}`);
+
+    const conversationSnapshot = await conversationRef.once("value");
+
+    if (!conversationSnapshot.exists()) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
+
+    // Delete the conversation
+    await conversationRef.remove();
+
+    res.status(200).json({ message: "Conversation deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting conversation:", error);
+    res.status(500).json({ message: "Failed to delete conversation" });
+  }
+};
+
 export const deleteUserMessages = async (req: Request, res: Response) => {
   const { userId } = req.params;
 

@@ -13,6 +13,7 @@ import NewMessage from "./NewMessage";
 import { formatTimestamp } from "../utils";
 import axios from "axios";
 import UserThumbnail from "../utiltyComponent/UserThumbnail";
+import { MdDeleteForever } from "react-icons/md";
 
 // Define the message structure types
 type Message = {
@@ -63,7 +64,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
   >(null);
-  const [isViewingThread, setIsViewingThread] = useState(false); // New state to track mobile view
+  const [isViewingThread, setIsViewingThread] = useState(false);
 
   // Check if user is on mobile
   const isMobile = useBreakpointValue({ base: true, lg: false });
@@ -94,6 +95,24 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
       setContacts(response.data.contacts);
     } catch (error) {
       console.error("Error fetching contacts", error);
+    }
+  };
+
+  const deleteConversation = async (conversationId: string) => {
+    try {
+      // Make the delete request
+      await axios.delete(
+        `http://localhost:5001/message/conversation/${conversationId}`
+      );
+
+      checkForNewMessages();
+
+      // Reset selectedConversation if it was deleted
+
+      setSelectedConversation(null);
+      setIsViewingThread(false);
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
     }
   };
 
@@ -263,6 +282,9 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
                         ? "gray.500"
                         : "transparent"
                     }
+                    display={"flex"}
+                    justifyContent={"space-between"}
+                    alignItems={"center"}
                   >
                     <Box display={"flex"} flexDir={"row"} alignItems={"center"}>
                       <UserThumbnail
@@ -296,6 +318,12 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
                         </Text>
                       </Box>
                     </Box>
+                    <Button
+                      colorScheme="red"
+                      onClick={() => deleteConversation(conversationId)}
+                    >
+                      <Icon as={MdDeleteForever} />
+                    </Button>
                   </Box>
                 );
               })}
