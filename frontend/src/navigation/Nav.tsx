@@ -8,6 +8,7 @@ import { BiMessageEdit } from "react-icons/bi";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import NewMessage from "../messages/NewMessage";
+import ToggleDarkMode from "../utiltyComponent/ToggleDarkMode";
 
 type User = {
   email: string;
@@ -29,6 +30,8 @@ interface NavProps {
   setUser: (value: React.SetStateAction<User | null>) => void;
   contacts: Contact[] | null; // Allow contacts to be null or an array
   user: User | null;
+  toggleDarkMode: () => void;
+  darkMode: boolean;
 }
 
 const Nav: React.FC<NavProps> = ({
@@ -37,6 +40,8 @@ const Nav: React.FC<NavProps> = ({
   setUser,
   contacts,
   user,
+  toggleDarkMode,
+  darkMode,
 }) => {
   const [expandMenu, setExpandMenu] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -59,14 +64,20 @@ const Nav: React.FC<NavProps> = ({
         position={"absolute"}
         height={"60px"}
         backgroundColor={"#3C4565"}
-        justifyContent={"flex-start"}
+        justifyContent={"space-between"}
         alignItems={"center"}
+        display={"flex"}
       >
-        <MobileMenu
-          handleLogOut={handleLogout}
-          contacts={contacts}
-          user={user}
-        />
+        <Box>
+          <MobileMenu
+            handleLogOut={handleLogout}
+            contacts={contacts}
+            user={user}
+          />
+        </Box>
+        <Box>
+          <ToggleDarkMode toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+        </Box>
       </Box>
       <Box
         height={"100vh"}

@@ -11,6 +11,11 @@ import {
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useState } from "react";
+import {
+  capataliseFirstLetter,
+  validateEmail,
+  isStrongPassword,
+} from "../utils";
 
 interface SignupProps {
   handleSelectSignup: () => void;
@@ -35,6 +40,44 @@ const Signup: React.FC<SignupProps> = ({
 
   const createUser = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
+    if (!validateEmail(email)) {
+      toast({
+        title: "Email address invalid",
+        description:
+          "Your email address is invalid, please check the email address and try agin",
+        status: "warning",
+        position: "top",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (confirmPassword !== password) {
+      toast({
+        title: "Confirmation password error",
+        description:
+          "Your password is invalid, please make sure you have entered a valid password and then try again",
+        status: "warning",
+        position: "top",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      toast({
+        title: "Password is too weak",
+        description: `Your password must be at least 8 characters in length, contain both upper and lower case letters, at least one number, and contain at least one special character (!@#$%^&*(),.?":{}|<>)</>)`,
+        status: "warning",
+        position: "top",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:5001/user/createUser", {
         method: "POST",
@@ -69,31 +112,35 @@ const Signup: React.FC<SignupProps> = ({
   return (
     <Box display={!selectSignup ? "none" : "block"}>
       <form onSubmit={createUser}>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="lg" rounded="lg" m={"25px"}>
           <FormControl isRequired>
             <Input
               type="text"
               placeholder="First Name"
               value={firstName}
-              onChange={(event) => setFirstName(event.currentTarget.value)}
+              onChange={(event) =>
+                setFirstName(capataliseFirstLetter(event.currentTarget.value))
+              }
               border={"none"}
               shadow={3}
             />
           </FormControl>
         </Box>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="lg" rounded="lg" m={"25px"}>
           <FormControl isRequired>
             <Input
               type="text"
               placeholder="Last Name"
               value={lastName}
-              onChange={(event) => setLastName(event.currentTarget.value)}
+              onChange={(event) =>
+                setLastName(capataliseFirstLetter(event.currentTarget.value))
+              }
               border={"none"}
               shadow={3}
             />
           </FormControl>
         </Box>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="lg" rounded="lg" m={"25px"}>
           <FormControl isRequired>
             <Input
               type="text"
@@ -105,7 +152,7 @@ const Signup: React.FC<SignupProps> = ({
             />
           </FormControl>
         </Box>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="" rounded="lg" m={"25px"}>
           <Stack spacing={4} w="300px" my="10px">
             <InputGroup>
               <FormControl isRequired>
@@ -129,7 +176,7 @@ const Signup: React.FC<SignupProps> = ({
             </InputGroup>
           </Stack>
         </Box>
-        <Box boxShadow="lg" rounded="lg" bg="white" m={"25px"}>
+        <Box boxShadow="lg" rounded="lg" m={"25px"}>
           <Stack spacing={4} w="300px" my="10px">
             <InputGroup>
               <FormControl isRequired>

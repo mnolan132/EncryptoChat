@@ -41,6 +41,7 @@ type User = {
 
 interface MessagesProps {
   user: null | User;
+  darkMode: boolean;
 }
 
 interface Contact {
@@ -50,7 +51,7 @@ interface Contact {
   lastName: string;
 }
 
-const Conversations: React.FC<MessagesProps> = ({ user }) => {
+const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
 
   const [messagesData, setMessagesData] = useState<MessagesResponse | null>(
@@ -259,7 +260,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
                     cursor="pointer"
                     bg={
                       selectedConversation === conversationId
-                        ? "gray.200"
+                        ? "gray.500"
                         : "transparent"
                     }
                   >
@@ -306,6 +307,7 @@ const Conversations: React.FC<MessagesProps> = ({ user }) => {
       {selectedConversation && (!isMobile || isViewingThread) && (
         <Box w={{ base: "100%", lg: "50%" }} px={4}>
           <MessageThread
+            darkMode={darkMode}
             messages={getConversationMessages(selectedConversation)}
             currentUserId={user?.id || ""}
             otherParticipantName={
