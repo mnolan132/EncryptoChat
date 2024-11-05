@@ -34,6 +34,7 @@ interface MessageProps {
   isViewingThread: boolean;
   isMobile: boolean | undefined;
   setIsViewingThread: (value: React.SetStateAction<boolean>) => void;
+  darkMode: boolean;
 }
 
 const MessageThread: React.FC<MessageProps> = ({
@@ -44,6 +45,7 @@ const MessageThread: React.FC<MessageProps> = ({
   isViewingThread,
   isMobile,
   setIsViewingThread,
+  darkMode,
 }) => {
   const [messageContent, setMessageContent] = useState("");
   const toast = useToast();
@@ -109,7 +111,6 @@ const MessageThread: React.FC<MessageProps> = ({
       <Box
         position="sticky"
         top={0}
-        bg="white"
         zIndex={1}
         p={1}
         borderBottom="1px solid lightgray"
@@ -151,10 +152,10 @@ const MessageThread: React.FC<MessageProps> = ({
                 maxWidth="60%"
                 textAlign={"left"}
               >
-                <Text fontSize="sm" mb={1} color="gray.600">
+                <Text fontSize="sm" mb={1} textColor="gray.600">
                   {formatTimestamp(msg.message.timestamp)}
                 </Text>
-                <Text>{msg.message.messageContent}</Text>
+                <Text textColor="gray.600">{msg.message.messageContent}</Text>
               </Box>
             </Box>
           );
@@ -165,7 +166,6 @@ const MessageThread: React.FC<MessageProps> = ({
       <Box
         position="sticky"
         bottom={0}
-        bg="white"
         p={4}
         borderTop="1px solid lightgray"
         zIndex={1}

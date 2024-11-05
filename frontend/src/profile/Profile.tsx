@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { 
-  Box, 
-  Button, 
-  Image, 
-  Text, 
-  Flex,  
-  Input, 
-  FormLabel, 
-  useDisclosure, 
-  useToast, 
-  FormControl, 
-  VStack, 
-  IconButton, 
-  HStack, 
-  Divider
+import {
+  Box,
+  Button,
+  Image,
+  Text,
+  Flex,
+  Input,
+  FormLabel,
+  useDisclosure,
+  useToast,
+  FormControl,
+  VStack,
+  IconButton,
+  HStack,
+  Divider,
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import UserThumbnail from "../utiltyComponent/UserThumbnail";
-
 
 type User = {
   email: string;
@@ -30,13 +29,14 @@ type User = {
 type UserData = {
   plainPassword: string;
   profilePicture?: string;
-}
+};
 
 interface UserProfileProps {
   user: null | User;
+  darkMode: boolean;
 }
 
-const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
+const ProfilePage: React.FC<UserProfileProps> = ({ user, darkMode }) => {
   const [profile, setProfile] = useState<User | null>(null);
   const [profilePicture, setProfilePicture] = useState<UserData | null>(null);
   const [plainPassword, setPlainPassword] = useState<UserData | null>(null);
@@ -50,19 +50,21 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
   const fetchUserProfile = async () => {
     try {
       console.log(`Fetching data for user: ${user?.id}`);
-      const response = await axios.get(`http://localhost:5001/user/${user?.id}`);
+      const response = await axios.get(
+        `http://localhost:5001/user/${user?.id}`
+      );
 
-      console.log('Response received:', response); // Debugging log
+      console.log("Response received:", response); // Debugging log
       if (response.status === 200) {
         setProfile(response.data); // Store data in state
       } else {
-        throw new Error('Unexpected response status');
+        throw new Error("Unexpected response status");
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error("Error fetching user profile:", error);
       toast({
-        title: 'Error fetching user profile',
-        status: 'error',
+        title: "Error fetching user profile",
+        status: "error",
         duration: 3000,
         isClosable: true,
       });
@@ -75,36 +77,34 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
     fetchUserProfile();
   }, [user]);
 
-
-
   // Handle profile update submission
   const handleUpdateProfile = async () => {
     const payload = {
-      firstName: profile?.firstName || '',
-      lastName: profile?.lastName || '',
-      email: profile?.email || '',
-      plainPassword: plainPassword?.plainPassword || '',
+      firstName: profile?.firstName || "",
+      lastName: profile?.lastName || "",
+      email: profile?.email || "",
+      plainPassword: plainPassword?.plainPassword || "",
     };
-  
+
     try {
       const response = await axios.put(
         `http://localhost:5001/profile/user/${user?.id}`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
-  
+
       toast({
         title: response.data.message || "Profile updated successfully",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
-  
+
       fetchUserProfile(); // Refresh the profile data after update
       onClose(); // Close the update form/modal
     } catch (error) {
       console.error("Error updating profile:", error);
-  
+
       toast({
         title: "Error updating profile",
         status: "error",
@@ -127,7 +127,7 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
       {/* Left Side: Profile Information */}
       <Box
         flex={1}
-        bg="white"
+        bg={darkMode ? "#3c3c3c" : "white"}
         p={6}
         borderRadius="md"
         boxShadow="lg"
@@ -147,16 +147,8 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
           ) : (
             <Box display={"flex"} flexDir={"row"} alignItems={"center"}>
               <UserThumbnail
-                firstName={
-                  profile?.firstName.split(
-                    " "
-                  )[0] || "Unknown"
-                }
-                lastName={
-                  profile?.lastName.split(
-                    " "
-                  )[0] || ""
-                }
+                firstName={profile?.firstName.split(" ")[0] || "Unknown"}
+                lastName={profile?.lastName.split(" ")[0] || ""}
                 diameter="100px"
                 fontSize="40px"
               />
@@ -178,11 +170,11 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
       {/* Right Side for bigger screen: Edit Profile Form */}
       <Box
         flex={1}
-        bg="white"
+        bg={darkMode ? "#3c3c3c" : "white"}
         p={6}
         borderRadius="md"
         boxShadow="lg"
-        display={{base: editMode ? "block" : "none", md: "block"}}
+        display={{ base: editMode ? "block" : "none", md: "block" }}
       >
         <VStack spacing={4}>
           <Text fontSize="2xl" fontWeight="bold">
@@ -223,8 +215,12 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user }) => {
             <FormLabel>Change Password</FormLabel>
             <Input
               value={plainPassword?.plainPassword || ""}
-              onChange={(e) => setPlainPassword({ ...plainPassword!, plainPassword: e.target.value })
-            }
+              onChange={(e) =>
+                setPlainPassword({
+                  ...plainPassword!,
+                  plainPassword: e.target.value,
+                })
+              }
             />
           </FormControl>
           <HStack spacing={4}>
