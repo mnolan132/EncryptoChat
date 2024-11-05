@@ -133,7 +133,7 @@ const MessageThread: React.FC<MessageProps> = ({
         overflowY="auto"
         p={4}
         ref={messageRef}
-        maxHeight="calc(100vh - 200px)" // Adjust max height to ensure space for header and footer
+        height="calc(100vh - 200px)" // Adjust max height to ensure space for header and footer
       >
         {messages.map((msg) => {
           const isSentByCurrentUser = msg.message.senderId === currentUserId;
