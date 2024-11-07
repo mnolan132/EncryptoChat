@@ -271,6 +271,7 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
           fontSize={"x-large"}
           borderBottom={"1px solid black"}
           ml={{ base: "10px", sm: "20px", md: "40px" }}
+          mr={{ base: "10px", sm: "20px", md: "40px" }}
         >
           Contacts
         </Text>
