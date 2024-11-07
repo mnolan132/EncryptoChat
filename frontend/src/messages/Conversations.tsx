@@ -220,6 +220,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
       display={{ base: "block", lg: "flex" }}
       height={"100%"}
       overflowY={"auto"}
+      mx={{ base: "10px", sm: "20px", md: "40px" }}
     >
       {(!isViewingThread || !isMobile) && (
         <Box
@@ -230,7 +231,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
           <Button
             bg={"#0CCEC2"}
             my={"10px"}
-            mx={{ base: "10px", sm: "20px", md: "40px" }}
+            //mx={{ base: "10px", sm: "20px", md: "40px" }}
             onClick={onOpen}
           >
             <Box display={"flex"} alignItems={"center"}>
@@ -269,9 +270,10 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
                   <Box
                     textAlign={"left"}
                     key={conversationId}
-                    p={2}
+                    p={4}
                     borderBottom="1px solid black"
                     mt={0}
+                    //mx={{ base: "10px", sm: "20px", md: "40px" }}
                     onClick={() => {
                       setSelectedConversation(conversationId);
                       if (isMobile) setIsViewingThread(true);
