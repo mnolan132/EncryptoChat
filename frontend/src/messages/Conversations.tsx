@@ -14,6 +14,7 @@ import { formatTimestamp } from "../utils";
 import axios from "axios";
 import UserThumbnail from "../utiltyComponent/UserThumbnail";
 import { MdDeleteForever } from "react-icons/md";
+import ChatbotThread from "./ChatbotThread";
 
 // Define the message structure types
 type Message = {
@@ -22,6 +23,18 @@ type Message = {
   senderId: string;
   timestamp: string;
 };
+
+interface Chatbot {
+  id: string;
+  messageContent: string;
+  recipientId: string;
+  senderId: string;
+  timestamp: string;
+}
+
+interface ChatbotResponse {
+  messages: Chatbot[];
+}
 
 type MessageData = {
   id: string;
@@ -58,6 +71,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
   const [messagesData, setMessagesData] = useState<MessagesResponse | null>(
     null
   );
+  const [chatbotData, setChatbotData] = useState<ChatbotResponse | null>(null);
   const [conversationNames, setConversationNames] = useState<
     Record<string, string>
   >({});
@@ -74,6 +88,23 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
     try {
       const response = await fetch(
         `http://localhost:5001/message/get-messages/${user?.id}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      return null;
+    }
+  };
+
+  const fetchChatbotMessage = async (): Promise<ChatbotResponse | null> => {
+    try {
+      const response = await fetch(
+        `http://localhost:5001/message/get-chatbot-messages/${user?.id}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -119,6 +150,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
   // Function to check if new messages have been received
   const checkForNewMessages = async () => {
     const newMessagesData = await fetchMessages();
+    const newChatbotData = await fetchChatbotMessage();
     if (newMessagesData && newMessagesData.messages.length > 0) {
       if (
         !messagesData ||
@@ -127,6 +159,14 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
         setMessagesData(newMessagesData);
         await fetchUserNames(newMessagesData);
         // setDefaultConversation(newMessagesData);
+      }
+    }
+    if (newChatbotData && newChatbotData.messages.length > 0) {
+      if (
+        !chatbotData ||
+        newChatbotData.messages.length !== chatbotData.messages.length
+      ) {
+        setChatbotData(newChatbotData);
       }
     }
   };
@@ -208,6 +248,10 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
     );
   };
 
+  const getChatbotMessages = (chatbotData: ChatbotResponse | null) => {
+    return chatbotData?.messages.filter((msg) => msg.messageContent);
+  };
+
   const getOtherParticipantId = (conversation: MessageData) => {
     return user && user.id !== conversation.message.senderId
       ? conversation.message.senderId
@@ -253,6 +297,61 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
           >
             Conversations:
           </Text>
+          {chatbotData && (
+            <Box mt={0}>
+              <Box
+                textAlign={"left"}
+                key={"chatbot"}
+                p={4}
+                borderBottom="1px solid black"
+                mt={0}
+                //mx={{ base: "10px", sm: "20px", md: "40px" }}
+                onClick={() => {
+                  setSelectedConversation("chatbot");
+                  if (isMobile) setIsViewingThread(true);
+                }}
+                cursor="pointer"
+                bg={
+                  selectedConversation === "chatbot"
+                    ? "gray.500"
+                    : "transparent"
+                }
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+              >
+                <Box display={"flex"} flexDir={"row"} alignItems={"center"}>
+                  <UserThumbnail
+                    firstName={"Chat"}
+                    lastName={"Bot"}
+                    diameter="40px"
+                    fontSize="20px"
+                  />
+                  <Box ml={"15px"}>
+                    <Box display={"flex"} alignItems={"center"}>
+                      <Text fontWeight={"bold"} fontSize={"large"}>
+                        ChatBot
+                      </Text>
+                      <Text fontSize={"sm"} ml={"50px"}>
+                        {formatTimestamp(
+                          chatbotData.messages[chatbotData.messages.length - 1]
+                            ?.timestamp
+                        )}
+                      </Text>
+                    </Box>
+                    <Text>
+                      ChatBot:{" "}
+                      {chatbotData.messages[
+                        chatbotData.messages.length - 1
+                      ]?.messageContent.slice(0, 20)}
+                      ...
+                    </Text>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          )}
+
           {messagesData && (
             <Box mt={0}>
               {uniqueConversations.map((conversationId) => {
@@ -336,22 +435,33 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
 
       {selectedConversation && (!isMobile || isViewingThread) && (
         <Box w={{ base: "100%", lg: "50%" }} px={4}>
-          <MessageThread
-            darkMode={darkMode}
-            messages={getConversationMessages(selectedConversation)}
-            currentUserId={user?.id || ""}
-            otherParticipantName={
-              conversationNames[
-                getOtherParticipantId(getLatestMessage(selectedConversation)!)
-              ] || "Unknown"
-            }
-            recipientId={getOtherParticipantId(
-              getLatestMessage(selectedConversation)!
-            )} // Passing recipientId
-            isViewingThread={isViewingThread}
-            isMobile={isMobile}
-            setIsViewingThread={setIsViewingThread}
-          />
+          {selectedConversation === "chatbot" ? (
+            <ChatbotThread
+              currentUserId={user?.id || ""}
+              isViewingThread={isViewingThread}
+              isMobile={isMobile}
+              setIsViewingThread={setIsViewingThread}
+              darkMode={darkMode}
+              messageData={chatbotData}
+            />
+          ) : (
+            <MessageThread
+              darkMode={darkMode}
+              messages={getConversationMessages(selectedConversation)}
+              currentUserId={user?.id || ""}
+              otherParticipantName={
+                conversationNames[
+                  getOtherParticipantId(getLatestMessage(selectedConversation)!)
+                ] || "Unknown"
+              }
+              recipientId={getOtherParticipantId(
+                getLatestMessage(selectedConversation)!
+              )} // Passing recipientId
+              isViewingThread={isViewingThread}
+              isMobile={isMobile}
+              setIsViewingThread={setIsViewingThread}
+            />
+          )}
         </Box>
       )}
     </Box>

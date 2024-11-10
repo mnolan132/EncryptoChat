@@ -1,8 +1,22 @@
 import { Request, Response } from "express";
+import dotenv from "dotenv";
 import { db } from "../index";
 import { getConversationId } from "../../utils";
 import { Message } from "../../Message";
 import crypto from "crypto";
+const { OpenAI } = require("openai");
+
+dotenv.config();
+
+const openaiURL = "https://api.aimlapi.com/v1";
+const apiKey = process.env.OPEN_API_KEY;
+const systemPrompt =
+  "You are a conversation assistant. Be descriptive and helpful";
+
+const api = new OpenAI({
+  apiKey,
+  openaiURL,
+});
 
 // Define the ChatMessage interface if it's not defined elsewhere
 interface ChatMessage {
@@ -238,5 +252,105 @@ export const deleteUserMessages = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error deleting user messages:", error);
     res.status(500).json({ message: "Failed to delete user messages" });
+  }
+};
+
+// Function to send a new message to the chatbot and get a response
+export const newChatbotMessage = async (req: Request, res: Response) => {
+  const { userId, messageContent } = req.body;
+
+  if (!userId || !messageContent) {
+    return res
+      .status(400)
+      .json({ message: "User ID and message content are required" });
+  }
+
+  try {
+    // Send the user's message to the chatbot
+    const completion = await api.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: messageContent,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 256,
+    });
+
+    const chatbotResponse = completion.choices[0].message.content;
+
+    // Prepare the message object to save both user and chatbot responses
+    const timestamp = new Date().toISOString();
+    const conversationId = `chatbot_${userId}`;
+
+    // Store the user's message in the `chatbot_conversations` database location
+    const userMessageRef = db
+      .ref(`chatbot_conversations/${conversationId}/messages`)
+      .push();
+    await userMessageRef.set({
+      senderId: userId,
+      recipientId: "chatbot",
+      messageContent,
+      timestamp,
+    });
+
+    // Store the chatbot's response in the same location
+    const chatbotMessageRef = db
+      .ref(`chatbot_conversations/${conversationId}/messages`)
+      .push();
+    await chatbotMessageRef.set({
+      senderId: "chatbot",
+      recipientId: userId,
+      messageContent: chatbotResponse,
+      timestamp,
+    });
+
+    res.status(201).json({
+      userMessage: messageContent,
+      chatbotResponse,
+    });
+  } catch (error) {
+    console.error("Error generating chatbot response:", error);
+    res.status(500).json({ message: "Failed to generate chatbot response" });
+  }
+};
+
+// Function to retrieve all messages between the user and the chatbot
+export const getChatbotMessages = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    const conversationId = `chatbot_${userId}`;
+    const messagesRef = db.ref(
+      `chatbot_conversations/${conversationId}/messages`
+    );
+    const snapshot = await messagesRef.once("value");
+
+    if (!snapshot.exists()) {
+      return res
+        .status(404)
+        .json({ message: "No messages found with the chatbot" });
+    }
+
+    const messages = snapshot.val();
+    const formattedMessages = Object.keys(messages).map((key) => ({
+      id: key,
+      ...messages[key],
+    }));
+
+    res.status(200).json({ messages: formattedMessages });
+  } catch (error) {
+    console.error("Error retrieving chatbot messages:", error);
+    res.status(500).json({ message: "Failed to retrieve chatbot messages" });
   }
 };
