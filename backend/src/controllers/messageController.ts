@@ -4,6 +4,7 @@ import { db } from "../index";
 import { getConversationId } from "../../utils";
 import { Message } from "../../Message";
 import crypto from "crypto";
+
 const { OpenAI } = require("openai");
 
 dotenv.config();
@@ -352,5 +353,58 @@ export const getChatbotMessages = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error retrieving chatbot messages:", error);
     res.status(500).json({ message: "Failed to retrieve chatbot messages" });
+  }
+};
+
+export const sendWelcomeMessage = async (userId: string) => {
+  if (!userId) {
+    console.error("User ID is required for sending a welcome message.");
+    return;
+  }
+
+  const welcomeMessageContent =
+    "Welcome to Encrypto-Chat! I'm your friendly chatbot. How can I assist you today?";
+
+  try {
+    // Sending the welcome message to the chatbot model for further generation (optional)
+    const completion = await api.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a helpful assistant that welcomes users to the chat.",
+        },
+        {
+          role: "user",
+          content: welcomeMessageContent,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 150,
+    });
+
+    const chatbotResponse =
+      completion.choices[0].message.content || welcomeMessageContent;
+
+    // Prepare the message objects with timestamp
+    const timestamp = new Date().toISOString();
+    const conversationId = `chatbot_${userId}`;
+
+    // Store the welcome message in the `chatbot_conversations` database location
+    const chatbotMessageRef = db
+      .ref(`chatbot_conversations/${conversationId}/messages`)
+      .push();
+
+    await chatbotMessageRef.set({
+      senderId: "chatbot",
+      recipientId: userId,
+      messageContent: chatbotResponse,
+      timestamp,
+    });
+
+    console.log("Welcome message sent to user:", userId);
+  } catch (error) {
+    console.error("Error sending welcome message:", error);
   }
 };

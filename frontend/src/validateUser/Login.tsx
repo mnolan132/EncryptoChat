@@ -8,6 +8,7 @@ import {
   Button,
   Box,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import TwoFA from "./TwoFA";
@@ -41,6 +42,8 @@ const Login: React.FC<LoginProps> = ({
   const [password, setPassword] = useState("");
   const [viewTwoFA, setViewTwoFA] = useState(false);
   const [userIdString, setUserIdString] = useState(null);
+
+  const toast = useToast();
 
   const handle2FAComponent = () => {
     setViewTwoFA(!viewTwoFA);
@@ -78,6 +81,7 @@ const Login: React.FC<LoginProps> = ({
         },
         body: JSON.stringify({ email, plainPassword: password }),
       });
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
@@ -90,6 +94,25 @@ const Login: React.FC<LoginProps> = ({
       handle2FAComponent();
     } catch (error) {
       console.error("Error:", error);
+
+      // Ensure that the error is of type Error
+      if (error instanceof Error) {
+        toast({
+          title: "Login Failed",
+          description: error.message || "An error occurred while logging in.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "An unexpected error occurred.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     }
   };
 
