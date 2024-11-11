@@ -19,6 +19,7 @@ import {
   EmailIcon,
   SettingsIcon,
   CloseIcon,
+  SearchIcon,
 } from "@chakra-ui/icons";
 import axios from "axios";
 import NewMessage from "../messages/NewMessage";
@@ -46,6 +47,7 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [isViewingContact, setIsViewingContact] = useState(false);
   const toast = useToast();
@@ -176,6 +178,14 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
     }
   };
 
+  const filteredContacts = contacts.filter(
+    (contact) =>
+      contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+
   if (loading) return <div>Loading contacts...</div>;
 
   return (
@@ -216,6 +226,17 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
         display={"flex"}
         flexDir={"column"}
       >
+        <HStack mx={{base: 5, lg: 10}} mt={4}>
+          <Input
+            placeholder="Search contacts"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            variant="filled"
+          />
+          <Button leftIcon={<SearchIcon />} colorScheme="teal">
+            Search
+          </Button>
+        </HStack>
         <Button
           bg={"#0CCEC2"}
           my={"10px"}
@@ -276,7 +297,7 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
           Contacts
         </Text>
         <Box>
-        {contacts.map((contact) => (
+        {filteredContacts.map((contact) => (
           <Flex
             key={contact.id}
             p={2}
