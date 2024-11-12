@@ -104,7 +104,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
   const fetchChatbotMessage = async (): Promise<ChatbotResponse | null> => {
     try {
       const response = await fetch(
-        `http://localhost:5001/message/get-chatbot-messages/${user?.id}`,
+        `https://encrypto-chat-theta.vercel.app/message/get-chatbot-messages/${user?.id}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },

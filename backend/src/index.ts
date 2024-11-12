@@ -25,7 +25,39 @@ export const db = admin.database();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({ origin: "http://localhost:5173" }));
+// Allow multiple origins (local and deployed frontend)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://encrypto-chat.netlify.app",
+  "https://encrypto-chat-theta.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or server-side requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Allow cookies to be sent
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Allow these HTTP methods
+    allowedHeaders: "Content-Type,Authorization", // Allow these headers
+  })
+);
+
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
+  );
+  res.sendStatus(200);
+});
 
 // Routes
 app.use("/user", userRoutes);

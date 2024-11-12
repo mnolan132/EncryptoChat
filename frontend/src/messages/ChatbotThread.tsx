@@ -52,7 +52,7 @@ const ChatbotConversation: React.FC<ChatbotProps> = ({
 
     try {
       const response = await fetch(
-        "http://localhost:5001/message/new-chatbot-message",
+        "https://encrypto-chat-theta.vercel.app/message/new-chatbot-message",
         {
           method: "POST",
           headers: {
