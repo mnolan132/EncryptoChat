@@ -62,6 +62,8 @@ const ChatbotConversation: React.FC<ChatbotProps> = ({
             userId: currentUserId,
             messageContent,
           }),
+          // Optional: Use 'include' if you're using cookies or tokens
+          credentials: "include",
         }
       );
 
@@ -70,7 +72,6 @@ const ChatbotConversation: React.FC<ChatbotProps> = ({
       }
 
       const data = await response.json();
-
       setMessageContent("");
       toast({
         title: "Message sent",

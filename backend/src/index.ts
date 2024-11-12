@@ -32,6 +32,7 @@ const allowedOrigins = [
   "https://encrypto-chat-theta.vercel.app",
 ];
 
+// CORS Middleware
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -43,20 +44,22 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // Allow cookies to be sent
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Allow these HTTP methods
-    allowedHeaders: "Content-Type,Authorization", // Allow these headers
+    credentials: true,
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// Explicitly handle preflight OPTIONS request
 app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header(
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.setHeader(
     "Access-Control-Allow-Methods",
     "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
   );
-  res.sendStatus(200);
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(204); // Send 204 for preflight requests
 });
 
 // Routes
