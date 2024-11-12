@@ -13,7 +13,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5001;
 
-const serviceAccount = require("../serviceAccountKey.json");
+const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH!);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
