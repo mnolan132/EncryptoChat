@@ -87,7 +87,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
   const fetchMessages = async (): Promise<MessagesResponse | null> => {
     try {
       const response = await fetch(
-        `http://localhost:5001/message/get-messages/${user?.id}`,
+        `https://encrypto-chat-theta.vercel.app/message/get-messages/${user?.id}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -107,11 +107,24 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
         `https://encrypto-chat-theta.vercel.app/message/get-chatbot-messages/${user?.id}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
-      if (!response.ok) throw new Error(`Error: ${response.status}`);
-      return await response.json();
+
+      // Check for CORS preflight response
+      if (response.status === 204) {
+        console.warn("CORS Preflight passed, but no content received.");
+        return null;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error("Error fetching messages:", error);
       return null;
@@ -121,7 +134,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
   const fetchContacts = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5001/contacts/getContacts/${user?.id}`
+        `https://encrypto-chat-theta.vercel.app/contacts/getContacts/${user?.id}`
       );
       setContacts(response.data.contacts);
     } catch (error) {
@@ -133,7 +146,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
     try {
       // Make the delete request
       await axios.delete(
-        `http://localhost:5001/message/conversation/${conversationId}`
+        `https://encrypto-chat-theta.vercel.app/message/conversation/${conversationId}`
       );
 
       checkForNewMessages();
@@ -187,7 +200,7 @@ const Conversations: React.FC<MessagesProps> = ({ user, darkMode }) => {
       conversationParticipants.map(async (participantId) => {
         try {
           const response = await fetch(
-            `http://localhost:5001/user/${participantId}`
+            `https://encrypto-chat-theta.vercel.app/user/${participantId}`
           );
           if (response.ok) {
             const otherUser: User = await response.json();

@@ -51,7 +51,7 @@ const MessageModal: React.FC<NewMessageProps> = ({
 
     try {
       const response = await fetch(
-        "http://localhost:5001/message/new-message",
+        "https://encrypto-chat-theta.vercel.app/message/new-message",
         {
           method: "POST",
           headers: {

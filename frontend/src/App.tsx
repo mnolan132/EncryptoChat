@@ -26,7 +26,7 @@ function App() {
     console.log("Fetching contacts....");
     try {
       const response = await fetch(
-        `http://localhost:5001/contacts/getContacts/${user?.id}`
+        `https://encrypto-chat-theta.vercel.app/contacts/getContacts/${user?.id}`
       );
       console.log("Response status:", response.status);
 

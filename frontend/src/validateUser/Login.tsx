@@ -52,13 +52,16 @@ const Login: React.FC<LoginProps> = ({
   const send2FA = async (e: { preventDefault: () => void }, userId: string) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5001/auth/enable-2fa`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-      });
+      const response = await fetch(
+        `https://encrypto-chat-theta.vercel.app/auth/enable-2fa`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
@@ -74,13 +77,16 @@ const Login: React.FC<LoginProps> = ({
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5001/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, plainPassword: password }),
-      });
+      const response = await fetch(
+        "https://encrypto-chat-theta.vercel.app/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, plainPassword: password }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);

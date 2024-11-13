@@ -38,7 +38,7 @@ const TwoFA: React.FC<TwoFAProps> = ({
     e.preventDefault();
     try {
       const response = await fetch(
-        `http://localhost:5001/user/${userIdString}`,
+        `https://encrypto-chat-theta.vercel.app/user/${userIdString}`,
         {
           method: "GET",
           headers: {
@@ -62,13 +62,16 @@ const TwoFA: React.FC<TwoFAProps> = ({
   const verify2fa = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5001/auth/verify-2fa", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: userIdString, secretAttempt: pin }),
-      });
+      const response = await fetch(
+        "https://encrypto-chat-theta.vercel.app/auth/verify-2fa",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId: userIdString, secretAttempt: pin }),
+        }
+      );
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }

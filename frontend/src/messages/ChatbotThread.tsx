@@ -62,8 +62,6 @@ const ChatbotConversation: React.FC<ChatbotProps> = ({
             userId: currentUserId,
             messageContent,
           }),
-          // Optional: Use 'include' if you're using cookies or tokens
-          credentials: "include",
         }
       );
 

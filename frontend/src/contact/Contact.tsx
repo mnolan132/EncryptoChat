@@ -26,8 +26,6 @@ import NewMessage from "../messages/NewMessage";
 import { IoReturnDownBack } from "react-icons/io5";
 import UserThumbnail from "../utiltyComponent/UserThumbnail";
 
-
-
 type User = {
   email: string;
   firstName: string;
@@ -68,7 +66,7 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5001/contacts/getContacts/${user?.id}`
+        `https://encrypto-chat-theta.vercel.app/contacts/getContacts/${user?.id}`
       );
       console.log("Response status:", response.status);
 
@@ -115,7 +113,7 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
 
       // Send the contact to both sender and recipient
       const response = await axios.post(
-        `http://localhost:5001/contacts/addContact/${user?.id}`,
+        `https://encrypto-chat-theta.vercel.app/contacts/addContact/${user?.id}`,
         payload
       );
 
@@ -155,7 +153,7 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
     console.log("Deleting contact with ID:", contactId);
     try {
       await axios.delete(
-        `http://localhost:5001/contacts/deleteContact/${user?.id}/${contactId}`,
+        `https://encrypto-chat-theta.vercel.app/contacts/deleteContact/${user?.id}/${contactId}`,
         { data: { id: contactId } }
       );
       setContacts(contacts.filter((contact) => contact.id !== contactId));
@@ -185,7 +183,6 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
       contact.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-
   if (loading) return <div>Loading contacts...</div>;
 
   return (
@@ -209,9 +206,9 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
           </Button>
         )}
         {selectedContact && (isViewingContact || !isMobile) && (
-          <Text 
-            fontWeight={"medium"} 
-            fontSize={"large"} 
+          <Text
+            fontWeight={"medium"}
+            fontSize={"large"}
             textAlign={"left"}
             display={{ base: "block", lg: "none" }}
           >
@@ -219,152 +216,148 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
           </Text>
         )}
       </Box>
-       
-    {(!isViewingContact || !isMobile) && (
-      <Box
-        w={{ base: "100%", lg: "50%" }}
-        display={"flex"}
-        flexDir={"column"}
-      >
-        <HStack mx={{base: 5, lg: 10}} mt={4}>
-          <Input
-            placeholder="Search contacts"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            variant="filled"
-          />
-          <Button leftIcon={<SearchIcon />} colorScheme="teal">
-            Search
-          </Button>
-        </HStack>
-        <Button
-          bg={"#0CCEC2"}
-          my={"10px"}
-          mx={{ base: "10px", sm: "20px", md: "40px" }}
-          onClick={() => {
-            setShowAddForm(true);
-            setSelectedContact(null);
-          }}
+
+      {(!isViewingContact || !isMobile) && (
+        <Box
+          w={{ base: "100%", lg: "50%" }}
+          display={"flex"}
+          flexDir={"column"}
         >
-          <Box display={"flex"} alignItems={"center"}>
-            <Icon as={AddIcon} h={"20px"} w={"20px"} mx={"10px"} />
-            <Text>Add Contact</Text>
-          </Box>
-        </Button>
-        {showAddForm && (
-          <VStack spacing={4} mb={8} display={"flex"}>
-            <HStack justifyContent="space-between" w="100%">
-              <Text fontSize="2xl" fontWeight="bold">
-                Add New Contact
-              </Text>
-              <Button size="sm" onClick={() => setShowAddForm(false)}>
-                <CloseIcon />
-              </Button>
-            </HStack>
+          <HStack mx={{ base: 5, lg: 10 }} mt={4}>
             <Input
-              placeholder="Enter First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Search contacts"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              variant="filled"
             />
-            <Input
-              placeholder="Enter Last Name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-            <Input
-              placeholder="Enter Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Flex direction={"row"} gap={8}>
-            <Button bg="#0CCEC2" onClick={handleAddContact}>
-              Save
+            <Button leftIcon={<SearchIcon />} colorScheme="teal">
+              Search
             </Button>
-            <Button onClick={() => setShowAddForm(false)}>
-              Cancel
-            </Button>
-            </Flex>
-          </VStack>
-        )}
-        <Text
-          textAlign={"left"}
-          fontWeight={"medium"}
-          fontSize={"x-large"}
-          borderBottom={"1px solid black"}
-          ml={{ base: "10px", sm: "20px", md: "40px" }}
-          mr={{ base: "10px", sm: "20px", md: "40px" }}
-        >
-          Contacts
-        </Text>
-        <Box>
-        {filteredContacts.map((contact) => (
-          <Flex
-            key={contact.id}
-            p={2}
-            align="center"
-            cursor="pointer"
+          </HStack>
+          <Button
+            bg={"#0CCEC2"}
+            my={"10px"}
+            mx={{ base: "10px", sm: "20px", md: "40px" }}
             onClick={() => {
-              setSelectedContact(contact);
-              if (isMobile) setIsViewingContact(true);
-              setShowAddForm(false);
+              setShowAddForm(true);
+              setSelectedContact(null);
             }}
-            bg={selectedContact?.id === contact.id ? "gray.200" : "transparent"}
-            _hover={{ bg: "gray.100" }}
           >
-          <Box ml={{ base: "10px", sm: "20px", md: "40px" }}>
-            {contact?.contactPicture ? (
-              <Image
-                boxSize="100px"
-                borderRadius="full"
-                src={contact.contactPicture}
-                alt={`${contact.firstName} ${contact.lastName}`}
-                mr={4}
-              /> 
-            ) : (
-              <Box display={"flex"} flexDir={"row"} alignItems={"center"}>
-                <UserThumbnail
-                  firstName={
-                    contact?.firstName.split(
-                      " "
-                    )[0] || "Unknown"
-                  }
-                  lastName={
-                    contact?.lastName.split(
-                      " "
-                    )[0] || ""
-                  }
-                  diameter="100px"
-                  fontSize="40px"
-                />
-              </Box>
-            )} 
+            <Box display={"flex"} alignItems={"center"}>
+              <Icon as={AddIcon} h={"20px"} w={"20px"} mx={"10px"} />
+              <Text>Add Contact</Text>
+            </Box>
+          </Button>
+          {showAddForm && (
+            <VStack spacing={4} mb={8} display={"flex"}>
+              <HStack justifyContent="space-between" w="100%">
+                <Text fontSize="2xl" fontWeight="bold">
+                  Add New Contact
+                </Text>
+                <Button size="sm" onClick={() => setShowAddForm(false)}>
+                  <CloseIcon />
+                </Button>
+              </HStack>
+              <Input
+                placeholder="Enter First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <Input
+                placeholder="Enter Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+              <Input
+                placeholder="Enter Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Flex direction={"row"} gap={8}>
+                <Button bg="#0CCEC2" onClick={handleAddContact}>
+                  Save
+                </Button>
+                <Button onClick={() => setShowAddForm(false)}>Cancel</Button>
+              </Flex>
+            </VStack>
+          )}
+          <Text
+            textAlign={"left"}
+            fontWeight={"medium"}
+            fontSize={"x-large"}
+            borderBottom={"1px solid black"}
+            ml={{ base: "10px", sm: "20px", md: "40px" }}
+            mr={{ base: "10px", sm: "20px", md: "40px" }}
+          >
+            Contacts
+          </Text>
+          <Box>
+            {filteredContacts.map((contact) => (
+              <Flex
+                key={contact.id}
+                p={2}
+                align="center"
+                cursor="pointer"
+                onClick={() => {
+                  setSelectedContact(contact);
+                  if (isMobile) setIsViewingContact(true);
+                  setShowAddForm(false);
+                }}
+                bg={
+                  selectedContact?.id === contact.id
+                    ? "gray.200"
+                    : "transparent"
+                }
+                _hover={{ bg: "gray.100" }}
+              >
+                <Box ml={{ base: "10px", sm: "20px", md: "40px" }}>
+                  {contact?.contactPicture ? (
+                    <Image
+                      boxSize="100px"
+                      borderRadius="full"
+                      src={contact.contactPicture}
+                      alt={`${contact.firstName} ${contact.lastName}`}
+                      mr={4}
+                    />
+                  ) : (
+                    <Box display={"flex"} flexDir={"row"} alignItems={"center"}>
+                      <UserThumbnail
+                        firstName={
+                          contact?.firstName.split(" ")[0] || "Unknown"
+                        }
+                        lastName={contact?.lastName.split(" ")[0] || ""}
+                        diameter="100px"
+                        fontSize="40px"
+                      />
+                    </Box>
+                  )}
+                </Box>
+                <Box ml="20px">
+                  <Text fontWeight="bold">
+                    {contact?.firstName || "firstname"}{" "}
+                    {contact?.lastName || "lastname"}
+                  </Text>
+                  <Text fontSize="sm" color="gray.500">
+                    {contact.email}
+                  </Text>
+                </Box>
+                <Box textAlign="right" flex={1}>
+                  <Button
+                    variant={"ghost"}
+                    leftIcon={<EmailIcon />}
+                    onClick={onOpen}
+                  />
+                  <NewMessage
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    contacts={contacts}
+                    currentUserId={user?.id}
+                  />
+                </Box>
+              </Flex>
+            ))}
           </Box>
-            <Box ml="20px">
-              <Text fontWeight="bold">
-                {contact?.firstName || "firstname"}{" "}
-                {contact?.lastName || "lastname"}
-              </Text>
-              <Text fontSize="sm" color="gray.500">
-                {contact.email}
-              </Text>
-            </Box>
-            <Box textAlign="right" flex={1}>
-              <Button
-                variant={"ghost"}
-                leftIcon={<EmailIcon />}
-                onClick={onOpen}
-              />
-              <NewMessage
-                isOpen={isOpen}
-                onClose={onClose}
-                contacts={contacts}
-                currentUserId={user?.id}
-              />
-            </Box>
-          </Flex>
-        ))}
         </Box>
-      </Box>
       )}
       {selectedContact && (!isMobile || isViewingContact) && (
         <VStack w={{ base: "100%", lg: "50%" }} px={4} mt={10}>
@@ -378,21 +371,15 @@ const ContactsPage: React.FC<ContactProps> = ({ user }) => {
             />
           ) : (
             <Box display={"flex"} flexDir={"row"} alignItems={"center"}>
-                <UserThumbnail
-                  firstName={
-                    selectedContact?.firstName.split(
-                      " "
-                    )[0] || "Unknown"
-                  }
-                  lastName={
-                    selectedContact?.lastName.split(
-                      " "
-                    )[0] || ""
-                  }
-                  diameter="100px"
-                  fontSize="40px"
-                />
-              </Box>
+              <UserThumbnail
+                firstName={
+                  selectedContact?.firstName.split(" ")[0] || "Unknown"
+                }
+                lastName={selectedContact?.lastName.split(" ")[0] || ""}
+                diameter="100px"
+                fontSize="40px"
+              />
+            </Box>
           )}
           <Text fontWeight="bold" fontSize="2xl">
             {selectedContact.firstName}

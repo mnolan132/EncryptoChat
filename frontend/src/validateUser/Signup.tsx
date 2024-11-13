@@ -79,18 +79,21 @@ const Signup: React.FC<SignupProps> = ({
     }
 
     try {
-      const response = await fetch("http://localhost:5001/user/createUser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          plainPassword: password,
-        }),
-      });
+      const response = await fetch(
+        "https://encrypto-chat-theta.vercel.app/user/createUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            plainPassword: password,
+          }),
+        }
+      );
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }

@@ -13,7 +13,7 @@ import {
   FormControl,
   VStack,
   IconButton,
-  HStack
+  HStack,
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import UserThumbnail from "../utiltyComponent/UserThumbnail";
@@ -50,7 +50,7 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user, darkMode }) => {
     try {
       console.log(`Fetching data for user: ${user?.id}`);
       const response = await axios.get(
-        `http://localhost:5001/user/${user?.id}`
+        `https://encrypto-chat-theta.vercel.app/user/${user?.id}`
       );
 
       console.log("Response received:", response); // Debugging log
@@ -87,7 +87,7 @@ const ProfilePage: React.FC<UserProfileProps> = ({ user, darkMode }) => {
 
     try {
       const response = await axios.put(
-        `http://localhost:5001/profile/user/${user?.id}`,
+        `https://encrypto-chat-theta.vercel.app/profile/user/${user?.id}`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
